@@ -31,7 +31,14 @@ namespace PerfumeAllocationSystem.Models
         // Clone this requirement (useful for backtracking algorithm)
         public StoreRequirement Clone()
         {
-            StoreRequirement clone = new StoreRequirement
+            StoreRequirement clone = CreateClonedStore();
+            CloneAllocatedPerfumes(clone);
+            return clone;
+        }
+
+        private StoreRequirement CreateClonedStore()
+        {
+            return new StoreRequirement
             {
                 StoreName = this.StoreName,
                 Budget = this.Budget,
@@ -47,14 +54,14 @@ namespace PerfumeAllocationSystem.Models
                 SatisfactionPercentage = this.SatisfactionPercentage,
                 TotalSpent = this.TotalSpent
             };
+        }
 
-            // Clone the allocated perfumes list
+        private void CloneAllocatedPerfumes(StoreRequirement clone)
+        {
             foreach (var perfume in this.AllocatedPerfumes)
             {
                 clone.AllocatedPerfumes.Add(perfume.Clone());
             }
-
-            return clone;
         }
     }
 }

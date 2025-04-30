@@ -84,16 +84,17 @@ namespace PerfumeAllocationSystem
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPerfumes);
             this.tabControl1.Controls.Add(this.tabStores);
             this.tabControl1.Controls.Add(this.tabAllocation);
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
+            this.tabControl1.Location = new System.Drawing.Point(16, 15);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1060, 607);
+            this.tabControl1.Size = new System.Drawing.Size(1413, 747);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPerfumes
@@ -101,10 +102,11 @@ namespace PerfumeAllocationSystem
             this.tabPerfumes.Controls.Add(this.lblPerfumesSummary);
             this.tabPerfumes.Controls.Add(this.btnLoadPerfumes);
             this.tabPerfumes.Controls.Add(this.dgvPerfumes);
-            this.tabPerfumes.Location = new System.Drawing.Point(4, 22);
+            this.tabPerfumes.Location = new System.Drawing.Point(4, 25);
+            this.tabPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPerfumes.Name = "tabPerfumes";
-            this.tabPerfumes.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerfumes.Size = new System.Drawing.Size(1052, 581);
+            this.tabPerfumes.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPerfumes.Size = new System.Drawing.Size(1405, 718);
             this.tabPerfumes.TabIndex = 0;
             this.tabPerfumes.Text = "Perfume Inventory";
             this.tabPerfumes.UseVisualStyleBackColor = true;
@@ -113,17 +115,19 @@ namespace PerfumeAllocationSystem
             // 
             this.lblPerfumesSummary.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblPerfumesSummary.AutoSize = true;
-            this.lblPerfumesSummary.Location = new System.Drawing.Point(6, 559);
+            this.lblPerfumesSummary.Location = new System.Drawing.Point(8, 688);
+            this.lblPerfumesSummary.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblPerfumesSummary.Name = "lblPerfumesSummary";
-            this.lblPerfumesSummary.Size = new System.Drawing.Size(0, 13);
+            this.lblPerfumesSummary.Size = new System.Drawing.Size(0, 16);
             this.lblPerfumesSummary.TabIndex = 2;
             // 
             // btnLoadPerfumes
             // 
             this.btnLoadPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoadPerfumes.Location = new System.Drawing.Point(940, 552);
+            this.btnLoadPerfumes.Location = new System.Drawing.Point(1253, 679);
+            this.btnLoadPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnLoadPerfumes.Name = "btnLoadPerfumes";
-            this.btnLoadPerfumes.Size = new System.Drawing.Size(106, 23);
+            this.btnLoadPerfumes.Size = new System.Drawing.Size(141, 28);
             this.btnLoadPerfumes.TabIndex = 1;
             this.btnLoadPerfumes.Text = "Load CSV";
             this.btnLoadPerfumes.UseVisualStyleBackColor = true;
@@ -131,14 +135,16 @@ namespace PerfumeAllocationSystem
             // 
             // dgvPerfumes
             // 
-            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvPerfumes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvPerfumes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvPerfumes.Location = new System.Drawing.Point(6, 6);
+            this.dgvPerfumes.Location = new System.Drawing.Point(8, 7);
+            this.dgvPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvPerfumes.Name = "dgvPerfumes";
-            this.dgvPerfumes.Size = new System.Drawing.Size(1040, 540);
+            this.dgvPerfumes.RowHeadersWidth = 51;
+            this.dgvPerfumes.Size = new System.Drawing.Size(1387, 665);
             this.dgvPerfumes.TabIndex = 0;
             // 
             // tabStores
@@ -146,10 +152,11 @@ namespace PerfumeAllocationSystem
             this.tabStores.Controls.Add(this.btnClearStores);
             this.tabStores.Controls.Add(this.dgvStores);
             this.tabStores.Controls.Add(this.groupBox1);
-            this.tabStores.Location = new System.Drawing.Point(4, 22);
+            this.tabStores.Location = new System.Drawing.Point(4, 25);
+            this.tabStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabStores.Name = "tabStores";
-            this.tabStores.Padding = new System.Windows.Forms.Padding(3);
-            this.tabStores.Size = new System.Drawing.Size(1052, 581);
+            this.tabStores.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabStores.Size = new System.Drawing.Size(1405, 718);
             this.tabStores.TabIndex = 1;
             this.tabStores.Text = "Store Requirements";
             this.tabStores.UseVisualStyleBackColor = true;
@@ -157,9 +164,10 @@ namespace PerfumeAllocationSystem
             // btnClearStores
             // 
             this.btnClearStores.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClearStores.Location = new System.Drawing.Point(940, 552);
+            this.btnClearStores.Location = new System.Drawing.Point(1253, 679);
+            this.btnClearStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnClearStores.Name = "btnClearStores";
-            this.btnClearStores.Size = new System.Drawing.Size(106, 23);
+            this.btnClearStores.Size = new System.Drawing.Size(141, 28);
             this.btnClearStores.TabIndex = 3;
             this.btnClearStores.Text = "Clear All Stores";
             this.btnClearStores.UseVisualStyleBackColor = true;
@@ -167,19 +175,21 @@ namespace PerfumeAllocationSystem
             // 
             // dgvStores
             // 
-            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvStores.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvStores.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvStores.Location = new System.Drawing.Point(378, 6);
+            this.dgvStores.Location = new System.Drawing.Point(504, 7);
+            this.dgvStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvStores.Name = "dgvStores";
-            this.dgvStores.Size = new System.Drawing.Size(668, 540);
+            this.dgvStores.RowHeadersWidth = 51;
+            this.dgvStores.Size = new System.Drawing.Size(891, 665);
             this.dgvStores.TabIndex = 2;
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.btnGenerateRandomStore);
             this.groupBox1.Controls.Add(this.label10);
@@ -205,9 +215,11 @@ namespace PerfumeAllocationSystem
             this.groupBox1.Controls.Add(this.lblStoreName);
             this.groupBox1.Controls.Add(this.txtStoreName);
             this.groupBox1.Controls.Add(this.btnAddStore);
-            this.groupBox1.Location = new System.Drawing.Point(6, 6);
+            this.groupBox1.Location = new System.Drawing.Point(8, 7);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(366, 569);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(488, 700);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Add Store";
@@ -215,9 +227,10 @@ namespace PerfumeAllocationSystem
             // btnGenerateRandomStore
             // 
             this.btnGenerateRandomStore.Enabled = false;
-            this.btnGenerateRandomStore.Location = new System.Drawing.Point(124, 443);
+            this.btnGenerateRandomStore.Location = new System.Drawing.Point(165, 545);
+            this.btnGenerateRandomStore.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnGenerateRandomStore.Name = "btnGenerateRandomStore";
-            this.btnGenerateRandomStore.Size = new System.Drawing.Size(155, 23);
+            this.btnGenerateRandomStore.Size = new System.Drawing.Size(207, 28);
             this.btnGenerateRandomStore.TabIndex = 23;
             this.btnGenerateRandomStore.Text = "Generate Random Store";
             this.btnGenerateRandomStore.UseVisualStyleBackColor = true;
@@ -226,107 +239,120 @@ namespace PerfumeAllocationSystem
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 373);
+            this.label10.Location = new System.Drawing.Point(15, 459);
+            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(54, 13);
+            this.label10.Size = new System.Drawing.Size(66, 16);
             this.label10.TabIndex = 22;
             this.label10.Text = "Max Price";
             // 
             // txtMaxPrice
             // 
-            this.txtMaxPrice.Location = new System.Drawing.Point(124, 370);
+            this.txtMaxPrice.Location = new System.Drawing.Point(165, 455);
+            this.txtMaxPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtMaxPrice.Name = "txtMaxPrice";
-            this.txtMaxPrice.Size = new System.Drawing.Size(236, 20);
+            this.txtMaxPrice.Size = new System.Drawing.Size(313, 22);
             this.txtMaxPrice.TabIndex = 21;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(11, 347);
+            this.label9.Location = new System.Drawing.Point(15, 427);
+            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(107, 13);
+            this.label9.Size = new System.Drawing.Size(127, 16);
             this.label9.TabIndex = 20;
             this.label9.Text = "Min Projection (0-10)";
             // 
             // txtMinProjection
             // 
-            this.txtMinProjection.Location = new System.Drawing.Point(124, 344);
+            this.txtMinProjection.Location = new System.Drawing.Point(165, 423);
+            this.txtMinProjection.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtMinProjection.Name = "txtMinProjection";
-            this.txtMinProjection.Size = new System.Drawing.Size(236, 20);
+            this.txtMinProjection.Size = new System.Drawing.Size(313, 22);
             this.txtMinProjection.TabIndex = 19;
             this.txtMinProjection.Text = "0";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(11, 321);
+            this.label8.Location = new System.Drawing.Point(15, 395);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(107, 13);
+            this.label8.Size = new System.Drawing.Size(125, 16);
             this.label8.TabIndex = 18;
             this.label8.Text = "Min Longevity (0-10)";
             // 
             // txtMinLongevity
             // 
-            this.txtMinLongevity.Location = new System.Drawing.Point(124, 318);
+            this.txtMinLongevity.Location = new System.Drawing.Point(165, 391);
+            this.txtMinLongevity.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtMinLongevity.Name = "txtMinLongevity";
-            this.txtMinLongevity.Size = new System.Drawing.Size(236, 20);
+            this.txtMinLongevity.Size = new System.Drawing.Size(313, 22);
             this.txtMinLongevity.TabIndex = 17;
             this.txtMinLongevity.Text = "0";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(11, 295);
+            this.label7.Location = new System.Drawing.Point(15, 363);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(106, 13);
+            this.label7.Size = new System.Drawing.Size(137, 16);
             this.label7.TabIndex = 16;
             this.label7.Text = "Preferred Base Notes";
             // 
             // txtBaseNotes
             // 
-            this.txtBaseNotes.Location = new System.Drawing.Point(124, 292);
+            this.txtBaseNotes.Location = new System.Drawing.Point(165, 359);
+            this.txtBaseNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtBaseNotes.Name = "txtBaseNotes";
-            this.txtBaseNotes.Size = new System.Drawing.Size(236, 20);
+            this.txtBaseNotes.Size = new System.Drawing.Size(313, 22);
             this.txtBaseNotes.TabIndex = 15;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(11, 269);
+            this.label6.Location = new System.Drawing.Point(15, 331);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(116, 13);
+            this.label6.Size = new System.Drawing.Size(146, 16);
             this.label6.TabIndex = 14;
             this.label6.Text = "Preferred Middle Notes";
             // 
             // txtMiddleNotes
             // 
-            this.txtMiddleNotes.Location = new System.Drawing.Point(124, 266);
+            this.txtMiddleNotes.Location = new System.Drawing.Point(165, 327);
+            this.txtMiddleNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtMiddleNotes.Name = "txtMiddleNotes";
-            this.txtMiddleNotes.Size = new System.Drawing.Size(236, 20);
+            this.txtMiddleNotes.Size = new System.Drawing.Size(313, 22);
             this.txtMiddleNotes.TabIndex = 13;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(11, 243);
+            this.label5.Location = new System.Drawing.Point(15, 299);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(105, 13);
+            this.label5.Size = new System.Drawing.Size(130, 16);
             this.label5.TabIndex = 12;
             this.label5.Text = "Preferred Top Notes";
             // 
             // txtTopNotes
             // 
-            this.txtTopNotes.Location = new System.Drawing.Point(124, 240);
+            this.txtTopNotes.Location = new System.Drawing.Point(165, 295);
+            this.txtTopNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtTopNotes.Name = "txtTopNotes";
-            this.txtTopNotes.Size = new System.Drawing.Size(236, 20);
+            this.txtTopNotes.Size = new System.Drawing.Size(313, 22);
             this.txtTopNotes.TabIndex = 11;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(11, 216);
+            this.label4.Location = new System.Drawing.Point(15, 266);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(87, 13);
+            this.label4.Size = new System.Drawing.Size(109, 16);
             this.label4.TabIndex = 10;
             this.label4.Text = "Preferred Accord";
             // 
@@ -334,17 +360,19 @@ namespace PerfumeAllocationSystem
             // 
             this.cboAccord.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboAccord.FormattingEnabled = true;
-            this.cboAccord.Location = new System.Drawing.Point(124, 213);
+            this.cboAccord.Location = new System.Drawing.Point(165, 262);
+            this.cboAccord.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cboAccord.Name = "cboAccord";
-            this.cboAccord.Size = new System.Drawing.Size(236, 21);
+            this.cboAccord.Size = new System.Drawing.Size(313, 24);
             this.cboAccord.TabIndex = 9;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 189);
+            this.label3.Location = new System.Drawing.Point(15, 233);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(42, 13);
+            this.label3.Size = new System.Drawing.Size(52, 16);
             this.label3.TabIndex = 8;
             this.label3.Text = "Gender";
             // 
@@ -352,65 +380,73 @@ namespace PerfumeAllocationSystem
             // 
             this.cboGender.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboGender.FormattingEnabled = true;
-            this.cboGender.Location = new System.Drawing.Point(124, 186);
+            this.cboGender.Location = new System.Drawing.Point(165, 229);
+            this.cboGender.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cboGender.Name = "cboGender";
-            this.cboGender.Size = new System.Drawing.Size(236, 21);
+            this.cboGender.Size = new System.Drawing.Size(313, 24);
             this.cboGender.TabIndex = 7;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 163);
+            this.label2.Location = new System.Drawing.Point(15, 201);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(89, 13);
+            this.label2.Size = new System.Drawing.Size(108, 16);
             this.label2.TabIndex = 6;
             this.label2.Text = "Quantity Needed";
             // 
             // txtQuantity
             // 
-            this.txtQuantity.Location = new System.Drawing.Point(124, 160);
+            this.txtQuantity.Location = new System.Drawing.Point(165, 197);
+            this.txtQuantity.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtQuantity.Name = "txtQuantity";
-            this.txtQuantity.Size = new System.Drawing.Size(236, 20);
+            this.txtQuantity.Size = new System.Drawing.Size(313, 22);
             this.txtQuantity.TabIndex = 5;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 137);
+            this.label1.Location = new System.Drawing.Point(15, 169);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(41, 13);
+            this.label1.Size = new System.Drawing.Size(50, 16);
             this.label1.TabIndex = 4;
             this.label1.Text = "Budget";
             // 
             // txtBudget
             // 
-            this.txtBudget.Location = new System.Drawing.Point(124, 134);
+            this.txtBudget.Location = new System.Drawing.Point(165, 165);
+            this.txtBudget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtBudget.Name = "txtBudget";
-            this.txtBudget.Size = new System.Drawing.Size(236, 20);
+            this.txtBudget.Size = new System.Drawing.Size(313, 22);
             this.txtBudget.TabIndex = 3;
             // 
             // lblStoreName
             // 
             this.lblStoreName.AutoSize = true;
-            this.lblStoreName.Location = new System.Drawing.Point(11, 111);
+            this.lblStoreName.Location = new System.Drawing.Point(15, 137);
+            this.lblStoreName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblStoreName.Name = "lblStoreName";
-            this.lblStoreName.Size = new System.Drawing.Size(63, 13);
+            this.lblStoreName.Size = new System.Drawing.Size(79, 16);
             this.lblStoreName.TabIndex = 2;
             this.lblStoreName.Text = "Store Name";
             // 
             // txtStoreName
             // 
-            this.txtStoreName.Location = new System.Drawing.Point(124, 108);
+            this.txtStoreName.Location = new System.Drawing.Point(165, 133);
+            this.txtStoreName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtStoreName.Name = "txtStoreName";
-            this.txtStoreName.Size = new System.Drawing.Size(236, 20);
+            this.txtStoreName.Size = new System.Drawing.Size(313, 22);
             this.txtStoreName.TabIndex = 1;
             // 
             // btnAddStore
             // 
             this.btnAddStore.Enabled = false;
-            this.btnAddStore.Location = new System.Drawing.Point(124, 414);
+            this.btnAddStore.Location = new System.Drawing.Point(165, 510);
+            this.btnAddStore.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnAddStore.Name = "btnAddStore";
-            this.btnAddStore.Size = new System.Drawing.Size(122, 23);
+            this.btnAddStore.Size = new System.Drawing.Size(163, 28);
             this.btnAddStore.TabIndex = 0;
             this.btnAddStore.Text = "Add Store";
             this.btnAddStore.UseVisualStyleBackColor = true;
@@ -423,9 +459,10 @@ namespace PerfumeAllocationSystem
             this.tabAllocation.Controls.Add(this.btnSaveResults);
             this.tabAllocation.Controls.Add(this.dgvResults);
             this.tabAllocation.Controls.Add(this.btnRunAllocation);
-            this.tabAllocation.Location = new System.Drawing.Point(4, 22);
+            this.tabAllocation.Location = new System.Drawing.Point(4, 25);
+            this.tabAllocation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabAllocation.Name = "tabAllocation";
-            this.tabAllocation.Size = new System.Drawing.Size(1052, 581);
+            this.tabAllocation.Size = new System.Drawing.Size(1405, 718);
             this.tabAllocation.TabIndex = 2;
             this.tabAllocation.Text = "Allocation Results";
             this.tabAllocation.UseVisualStyleBackColor = true;
@@ -435,30 +472,33 @@ namespace PerfumeAllocationSystem
             this.lblTotalProfit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblTotalProfit.AutoSize = true;
             this.lblTotalProfit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTotalProfit.Location = new System.Drawing.Point(8, 555);
+            this.lblTotalProfit.Location = new System.Drawing.Point(11, 683);
+            this.lblTotalProfit.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTotalProfit.Name = "lblTotalProfit";
-            this.lblTotalProfit.Size = new System.Drawing.Size(134, 16);
+            this.lblTotalProfit.Size = new System.Drawing.Size(160, 20);
             this.lblTotalProfit.TabIndex = 4;
             this.lblTotalProfit.Text = "Total Profit: $0.00";
             // 
             // pnlAllocationDetails
             // 
-            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlAllocationDetails.AutoScroll = true;
             this.pnlAllocationDetails.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlAllocationDetails.Location = new System.Drawing.Point(8, 361);
+            this.pnlAllocationDetails.Location = new System.Drawing.Point(11, 444);
+            this.pnlAllocationDetails.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pnlAllocationDetails.Name = "pnlAllocationDetails";
-            this.pnlAllocationDetails.Size = new System.Drawing.Size(1036, 191);
+            this.pnlAllocationDetails.Size = new System.Drawing.Size(1381, 235);
             this.pnlAllocationDetails.TabIndex = 3;
             // 
             // btnSaveResults
             // 
             this.btnSaveResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSaveResults.Enabled = false;
-            this.btnSaveResults.Location = new System.Drawing.Point(947, 552);
+            this.btnSaveResults.Location = new System.Drawing.Point(1263, 679);
+            this.btnSaveResults.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnSaveResults.Name = "btnSaveResults";
-            this.btnSaveResults.Size = new System.Drawing.Size(97, 23);
+            this.btnSaveResults.Size = new System.Drawing.Size(129, 28);
             this.btnSaveResults.TabIndex = 2;
             this.btnSaveResults.Text = "Save Results";
             this.btnSaveResults.UseVisualStyleBackColor = true;
@@ -466,22 +506,25 @@ namespace PerfumeAllocationSystem
             // 
             // dgvResults
             // 
-            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvResults.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvResults.Location = new System.Drawing.Point(8, 41);
+            this.dgvResults.Location = new System.Drawing.Point(11, 50);
+            this.dgvResults.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvResults.Name = "dgvResults";
-            this.dgvResults.Size = new System.Drawing.Size(1036, 314);
+            this.dgvResults.RowHeadersWidth = 51;
+            this.dgvResults.Size = new System.Drawing.Size(1381, 386);
             this.dgvResults.TabIndex = 1;
             // 
             // btnRunAllocation
             // 
             this.btnRunAllocation.Enabled = false;
-            this.btnRunAllocation.Location = new System.Drawing.Point(8, 12);
+            this.btnRunAllocation.Location = new System.Drawing.Point(11, 15);
+            this.btnRunAllocation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnRunAllocation.Name = "btnRunAllocation";
-            this.btnRunAllocation.Size = new System.Drawing.Size(110, 23);
+            this.btnRunAllocation.Size = new System.Drawing.Size(147, 28);
             this.btnRunAllocation.TabIndex = 0;
             this.btnRunAllocation.Text = "Run Allocation";
             this.btnRunAllocation.UseVisualStyleBackColor = true;
@@ -490,9 +533,10 @@ namespace PerfumeAllocationSystem
             // btnReset
             // 
             this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnReset.Location = new System.Drawing.Point(970, 625);
+            this.btnReset.Location = new System.Drawing.Point(1293, 769);
+            this.btnReset.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnReset.Name = "btnReset";
-            this.btnReset.Size = new System.Drawing.Size(102, 23);
+            this.btnReset.Size = new System.Drawing.Size(136, 28);
             this.btnReset.TabIndex = 1;
             this.btnReset.Text = "Reset Everything";
             this.btnReset.UseVisualStyleBackColor = true;
@@ -500,11 +544,12 @@ namespace PerfumeAllocationSystem
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1084, 661);
+            this.ClientSize = new System.Drawing.Size(1445, 814);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.tabControl1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
             this.Text = "Perfume Allocation System";
             this.tabControl1.ResumeLayout(false);

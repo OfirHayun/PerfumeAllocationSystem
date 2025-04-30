@@ -23,23 +23,41 @@ namespace PerfumeAllocationSystem.Models
             int totalCriteria = 0;
             int matchingCriteria = 0;
 
-            // Check Gender
+            CheckGenderMatch(requirement, ref totalCriteria, ref matchingCriteria);
+            CheckAccordMatch(requirement, ref totalCriteria, ref matchingCriteria);
+            CheckQualityMatch(requirement, ref totalCriteria, ref matchingCriteria);
+            CheckPriceMatch(requirement, ref totalCriteria, ref matchingCriteria);
+            CheckNotesMatch(requirement, ref totalCriteria, ref matchingCriteria);
+
+            // If no criteria specified, return 100% match
+            if (totalCriteria == 0)
+                return 100.0;
+
+            return (double)matchingCriteria / totalCriteria * 100.0;
+        }
+
+        private void CheckGenderMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        {
             if (!string.IsNullOrEmpty(requirement.Gender))
             {
                 totalCriteria++;
                 if (Gender == requirement.Gender || Gender == "Unisex" || requirement.Gender == "Any")
                     matchingCriteria++;
             }
+        }
 
-            // Check MainAccord
+        private void CheckAccordMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        {
             if (!string.IsNullOrEmpty(requirement.PreferredAccord))
             {
                 totalCriteria++;
                 if (MainAccord == requirement.PreferredAccord)
                     matchingCriteria++;
             }
+        }
 
-            // Check Longevity
+        private void CheckQualityMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        {
             if (requirement.MinLongevity > 0)
             {
                 totalCriteria++;
@@ -47,49 +65,39 @@ namespace PerfumeAllocationSystem.Models
                     matchingCriteria++;
             }
 
-            // Check Projection
             if (requirement.MinProjection > 0)
             {
                 totalCriteria++;
                 if (Projection >= requirement.MinProjection)
                     matchingCriteria++;
             }
+        }
 
-            // Check Price
+        private void CheckPriceMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        {
             if (requirement.MaxPrice > 0)
             {
                 totalCriteria++;
                 if (AveragePrice <= requirement.MaxPrice)
                     matchingCriteria++;
             }
+        }
 
-            // Check Top/Middle/Base Notes
-            if (!string.IsNullOrEmpty(requirement.PreferredTopNotes))
+        private void CheckNotesMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        {
+            CheckSingleNoteMatch(requirement.PreferredTopNotes, TopNotes, ref totalCriteria, ref matchingCriteria);
+            CheckSingleNoteMatch(requirement.PreferredMiddleNotes, MiddleNotes, ref totalCriteria, ref matchingCriteria);
+            CheckSingleNoteMatch(requirement.PreferredBaseNotes, BaseNotes, ref totalCriteria, ref matchingCriteria);
+        }
+
+        private void CheckSingleNoteMatch(string requiredNote, string perfumeNotes, ref int totalCriteria, ref int matchingCriteria)
+        {
+            if (!string.IsNullOrEmpty(requiredNote))
             {
                 totalCriteria++;
-                if (TopNotes.Contains(requirement.PreferredTopNotes))
+                if (perfumeNotes.Contains(requiredNote))
                     matchingCriteria++;
             }
-
-            if (!string.IsNullOrEmpty(requirement.PreferredMiddleNotes))
-            {
-                totalCriteria++;
-                if (MiddleNotes.Contains(requirement.PreferredMiddleNotes))
-                    matchingCriteria++;
-            }
-
-            if (!string.IsNullOrEmpty(requirement.PreferredBaseNotes))
-            {
-                totalCriteria++;
-                if (BaseNotes.Contains(requirement.PreferredBaseNotes))
-                    matchingCriteria++;
-            }
-
-            // If no criteria specified, return 100% match
-            if (totalCriteria == 0)
-                return 100.0;
-
-            return (double)matchingCriteria / totalCriteria * 100.0;
         }
 
         // Clone this perfume (useful when allocating)

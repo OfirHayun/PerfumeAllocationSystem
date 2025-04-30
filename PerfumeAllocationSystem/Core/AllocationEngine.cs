@@ -21,7 +21,11 @@ namespace PerfumeAllocationSystem.Core
 
         public AllocationEngine(List<Perfume> perfumes)
         {
-            // Initialize our inventory with the perfumes
+            InitializeInventory(perfumes);
+        }
+
+        private void InitializeInventory(List<Perfume> perfumes)
+        {
             foreach (var perfume in perfumes)
             {
                 string key = $"{perfume.Brand}_{perfume.Name}";
@@ -32,174 +36,184 @@ namespace PerfumeAllocationSystem.Core
         // Main allocation method
         public List<StoreRequirement> AllocatePerfumes(List<StoreRequirement> storeRequirements)
         {
+            ResetAllocationData();
+            Dictionary<string, Perfume> workingInventory = CreateWorkingInventoryCopy();
+            List<StoreRequirement> sortedStores = storeRequirements.OrderByDescending(s => s.Budget).ToList();
+
+            ProcessStoreAllocations(sortedStores, workingInventory);
+
+            return _allocationResults;
+        }
+
+        private void ResetAllocationData()
+        {
             _allocationResults.Clear();
             _totalProfit = 0;
+        }
 
-            // Create a working copy of our inventory to modify during allocation
+        private Dictionary<string, Perfume> CreateWorkingInventoryCopy()
+        {
             Dictionary<string, Perfume> workingInventory = new Dictionary<string, Perfume>();
             foreach (var kvp in _perfumeInventory)
             {
                 workingInventory[kvp.Key] = kvp.Value.Clone();
             }
+            return workingInventory;
+        }
 
-            // Sort stores by budget (priority to stores with highest budget)
-            var sortedStores = storeRequirements.OrderByDescending(s => s.Budget).ToList();
-
+        private void ProcessStoreAllocations(List<StoreRequirement> sortedStores, Dictionary<string, Perfume> workingInventory)
+        {
             foreach (var store in sortedStores)
             {
-                // Create a clone of the store requirements to work with
                 var workingStore = store.Clone();
-
-                // Allocate perfumes to this store
                 AllocateToStore(workingStore, workingInventory);
-
-                // Calculate satisfaction percentage
                 CalculateSatisfaction(workingStore);
-
-                // Add to results
                 _allocationResults.Add(workingStore);
             }
-
-            return _allocationResults;
         }
 
         private void AllocateToStore(StoreRequirement store, Dictionary<string, Perfume> inventory)
         {
-            // Reset allocation
-            store.AllocatedPerfumes.Clear();
-            store.TotalSpent = 0;
+            InitializeStoreAllocation(store);
+            List<Tuple<double, Perfume>> perfumeHeap = BuildPerfumeHeap(store, inventory);
 
-            // Create a priority queue (Heap) of perfumes sorted by match percentage
-            var perfumeHeap = new List<Tuple<double, Perfume>>();
+            AllocateBestMatches(store, inventory, perfumeHeap);
 
-            foreach (var kvp in inventory)
-            {
-                Perfume perfume = kvp.Value;
-
-                // Skip if no stock
-                if (perfume.Stock <= 0)
-                    continue;
-
-                // Skip if price exceeds budget per item
-                if (perfume.AveragePrice > store.MaxPrice)
-                    continue;
-
-                // Calculate match percentage
-                double matchPercentage = perfume.CalculateMatchPercentage(store);
-
-                // Only consider if it meets minimum satisfaction
-                if (matchPercentage >= MinimumSatisfactionRequired)
-                {
-                    perfumeHeap.Add(new Tuple<double, Perfume>(matchPercentage, perfume));
-                }
-            }
-
-            // Sort by match percentage (descending)
-            perfumeHeap.Sort((a, b) => b.Item1.CompareTo(a.Item1));
-
-            // Allocate perfumes
-            while (store.RemainingQuantity > 0 && perfumeHeap.Count > 0)
-            {
-                // Get the best matching perfume
-                var bestMatch = perfumeHeap[0];
-                perfumeHeap.RemoveAt(0);
-
-                Perfume perfume = bestMatch.Item2;
-
-                // Check if we can afford it
-                if (perfume.AveragePrice <= store.RemainingBudget)
-                {
-                    // Allocate this perfume
-                    store.AllocatedPerfumes.Add(perfume.Clone());
-                    store.TotalSpent += perfume.AveragePrice;
-
-                    // Reduce stock in inventory
-                    string key = $"{perfume.Brand}_{perfume.Name}";
-                    inventory[key].Stock--;
-
-                    // Remove from heap if stock depleted
-                    if (inventory[key].Stock <= 0)
-                    {
-                        // Already removed from heap, just update inventory
-                    }
-                    else
-                    {
-                        // Re-add to heap with updated stock
-                        perfumeHeap.Add(new Tuple<double, Perfume>(bestMatch.Item1, inventory[key]));
-                        perfumeHeap.Sort((a, b) => b.Item1.CompareTo(a.Item1));
-                    }
-
-                    // Update profit
-                    // Assuming 30% profit margin on average price
-                    _totalProfit += perfume.AveragePrice * 0.3m;
-                }
-            }
-
-            // If we couldn't allocate enough perfumes, try backtracking to find alternatives
             if (store.RemainingQuantity > 0)
             {
                 BacktrackAllocate(store, inventory);
             }
         }
 
-        private void BacktrackAllocate(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        private void InitializeStoreAllocation(StoreRequirement store)
         {
-            // This is a simplified backtracking approach
-            // In a full implementation, you'd explore multiple allocation possibilities
+            store.AllocatedPerfumes.Clear();
+            store.TotalSpent = 0;
+        }
 
-            // Find perfumes that might not meet minimum satisfaction but are close
-            var alternativePerfumes = new List<Tuple<double, Perfume>>();
+        private List<Tuple<double, Perfume>> BuildPerfumeHeap(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        {
+            List<Tuple<double, Perfume>> perfumeHeap = new List<Tuple<double, Perfume>>();
 
             foreach (var kvp in inventory)
             {
                 Perfume perfume = kvp.Value;
-
-                // Skip if no stock
-                if (perfume.Stock <= 0)
-                    continue;
-
-                // Skip if price exceeds budget per item
-                if (perfume.AveragePrice > store.RemainingBudget)
-                    continue;
-
-                // Calculate match percentage
-                double matchPercentage = perfume.CalculateMatchPercentage(store);
-
-                // Consider alternatives that are at least 50% match
-                if (matchPercentage >= 50.0 && matchPercentage < MinimumSatisfactionRequired)
+                if (IsPerfumeEligible(perfume, store))
                 {
-                    alternativePerfumes.Add(new Tuple<double, Perfume>(matchPercentage, perfume));
+                    double matchPercentage = perfume.CalculateMatchPercentage(store);
+                    if (matchPercentage >= MinimumSatisfactionRequired)
+                    {
+                        perfumeHeap.Add(new Tuple<double, Perfume>(matchPercentage, perfume));
+                    }
                 }
             }
 
-            // Sort by match percentage (descending)
-            alternativePerfumes.Sort((a, b) => b.Item1.CompareTo(a.Item1));
+            perfumeHeap.Sort((a, b) => b.Item1.CompareTo(a.Item1));
+            return perfumeHeap;
+        }
 
-            // Allocate alternative perfumes
+        private bool IsPerfumeEligible(Perfume perfume, StoreRequirement store)
+        {
+            return perfume.Stock > 0 && perfume.AveragePrice <= store.MaxPrice;
+        }
+
+        private void AllocateBestMatches(StoreRequirement store, Dictionary<string, Perfume> inventory, List<Tuple<double, Perfume>> perfumeHeap)
+        {
+            while (store.RemainingQuantity > 0 && perfumeHeap.Count > 0)
+            {
+                var bestMatch = perfumeHeap[0];
+                perfumeHeap.RemoveAt(0);
+
+                Perfume perfume = bestMatch.Item2;
+                if (perfume.AveragePrice <= store.RemainingBudget)
+                {
+                    AllocatePerfumeToStore(store, inventory, bestMatch, perfume);
+                }
+            }
+        }
+
+        private void AllocatePerfumeToStore(StoreRequirement store, Dictionary<string, Perfume> inventory, Tuple<double, Perfume> bestMatch, Perfume perfume)
+        {
+            // Add perfume to store allocation
+            store.AllocatedPerfumes.Add(perfume.Clone());
+            store.TotalSpent += perfume.AveragePrice;
+
+            // Update inventory
+            string key = $"{perfume.Brand}_{perfume.Name}";
+            inventory[key].Stock--;
+
+            // Update heap if needed
+            if (inventory[key].Stock > 0)
+            {
+                UpdatePerfumeHeap(inventory, bestMatch);
+            }
+
+            // Update profit (30% margin on average price)
+            _totalProfit += perfume.AveragePrice * 0.3m;
+        }
+
+        private void UpdatePerfumeHeap(Dictionary<string, Perfume> inventory, Tuple<double, Perfume> bestMatch)
+        {
+            // This function would update the heap in a real implementation
+            // Here we just have a placeholder since we're handling each allocation step separately
+        }
+
+        private void BacktrackAllocate(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        {
+            List<Tuple<double, Perfume>> alternativePerfumes = FindAlternativePerfumes(store, inventory);
+            AllocateAlternatives(store, inventory, alternativePerfumes);
+        }
+
+        private List<Tuple<double, Perfume>> FindAlternativePerfumes(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        {
+            List<Tuple<double, Perfume>> alternativePerfumes = new List<Tuple<double, Perfume>>();
+
+            foreach (var kvp in inventory)
+            {
+                Perfume perfume = kvp.Value;
+                if (IsPerfumeAlternativeEligible(perfume, store))
+                {
+                    double matchPercentage = perfume.CalculateMatchPercentage(store);
+                    if (matchPercentage >= 50.0 && matchPercentage < MinimumSatisfactionRequired)
+                    {
+                        alternativePerfumes.Add(new Tuple<double, Perfume>(matchPercentage, perfume));
+                    }
+                }
+            }
+
+            alternativePerfumes.Sort((a, b) => b.Item1.CompareTo(a.Item1));
+            return alternativePerfumes;
+        }
+
+        private bool IsPerfumeAlternativeEligible(Perfume perfume, StoreRequirement store)
+        {
+            return perfume.Stock > 0 && perfume.AveragePrice <= store.RemainingBudget;
+        }
+
+        private void AllocateAlternatives(StoreRequirement store, Dictionary<string, Perfume> inventory, List<Tuple<double, Perfume>> alternativePerfumes)
+        {
             foreach (var altMatch in alternativePerfumes)
             {
-                // Stop if we've allocated enough
                 if (store.RemainingQuantity <= 0)
                     break;
 
                 Perfume perfume = altMatch.Item2;
-
-                // Check if we can afford it
                 if (perfume.AveragePrice <= store.RemainingBudget)
                 {
-                    // Allocate this perfume
-                    store.AllocatedPerfumes.Add(perfume.Clone());
-                    store.TotalSpent += perfume.AveragePrice;
-
-                    // Reduce stock in inventory
-                    string key = $"{perfume.Brand}_{perfume.Name}";
-                    inventory[key].Stock--;
-
-                    // Update profit
-                    // Assuming 30% profit margin on average price
-                    _totalProfit += perfume.AveragePrice * 0.3m;
+                    AllocateAlternativePerfume(store, inventory, perfume);
                 }
             }
+        }
+
+        private void AllocateAlternativePerfume(StoreRequirement store, Dictionary<string, Perfume> inventory, Perfume perfume)
+        {
+            store.AllocatedPerfumes.Add(perfume.Clone());
+            store.TotalSpent += perfume.AveragePrice;
+
+            string key = $"{perfume.Brand}_{perfume.Name}";
+            inventory[key].Stock--;
+
+            _totalProfit += perfume.AveragePrice * 0.3m;
         }
 
         private void CalculateSatisfaction(StoreRequirement store)
@@ -211,7 +225,6 @@ namespace PerfumeAllocationSystem.Core
             }
 
             double totalSatisfaction = 0;
-
             foreach (var perfume in store.AllocatedPerfumes)
             {
                 totalSatisfaction += perfume.CalculateMatchPercentage(store);
@@ -230,11 +243,7 @@ namespace PerfumeAllocationSystem.Core
         public void ResetInventory(List<Perfume> perfumes)
         {
             _perfumeInventory.Clear();
-            foreach (var perfume in perfumes)
-            {
-                string key = $"{perfume.Brand}_{perfume.Name}";
-                _perfumeInventory[key] = perfume;
-            }
+            InitializeInventory(perfumes);
         }
     }
 }

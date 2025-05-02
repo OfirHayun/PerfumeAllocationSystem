@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Linq;
 using PerfumeAllocationSystem.Core;
 using PerfumeAllocationSystem.Models;
 using PerfumeAllocationSystem.Services;
@@ -36,6 +37,14 @@ namespace PerfumeAllocationSystem
             InitializeLabelsAndTimers();
             SetupDataGridViews();
             InitializeComboBoxes();
+
+            // Set default values for longevity and projection
+            txtMinLongevity.Text = "1";  // Change from "0" to "1"
+            txtMinProjection.Text = "1";  // Change from "0" to "1"
+
+            // Add validators to prevent entering zero or invalid values
+            txtMinLongevity.KeyPress += NumericTextBox_KeyPress;
+            txtMinProjection.KeyPress += NumericTextBox_KeyPress;
         }
 
         private void InitializeFormStyle()
@@ -417,15 +426,15 @@ namespace PerfumeAllocationSystem
 
         private bool ValidateLongevityProjection()
         {
-            if (!int.TryParse(txtMinLongevity.Text, out int minLongevity) || minLongevity < 0 || minLongevity > 10)
+            if (!int.TryParse(txtMinLongevity.Text, out int minLongevity) || minLongevity <= 0 || minLongevity > 10)
             {
-                MessageBox.Show("Please enter a valid minimum longevity (0-10)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid minimum longevity (1-10)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
-            if (!int.TryParse(txtMinProjection.Text, out int minProjection) || minProjection < 0 || minProjection > 10)
+            if (!int.TryParse(txtMinProjection.Text, out int minProjection) || minProjection <= 0 || minProjection > 10)
             {
-                MessageBox.Show("Please enter a valid minimum projection (0-10)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please enter a valid minimum projection (1-10)", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -540,8 +549,8 @@ namespace PerfumeAllocationSystem
 
         private void GenerateRandomQualitySettings()
         {
-            txtMinLongevity.Text = _random.Next(11).ToString(); // 0-10
-            txtMinProjection.Text = _random.Next(11).ToString(); // 0-10
+            txtMinLongevity.Text = _random.Next(1, 11).ToString(); // 1-10 instead of 0-10
+            txtMinProjection.Text = _random.Next(1, 11).ToString(); // 1-10 instead of 0-10
             txtMaxPrice.Text = _random.Next(50, 401).ToString(); // $50-$400
         }
 
@@ -569,8 +578,8 @@ namespace PerfumeAllocationSystem
             txtTopNotes.Text = "";
             txtMiddleNotes.Text = "";
             txtBaseNotes.Text = "";
-            txtMinLongevity.Text = "0";
-            txtMinProjection.Text = "0";
+            txtMinLongevity.Text = "1"; // Changed from "0" to "1"
+            txtMinProjection.Text = "1"; // Changed from "0" to "1"
             txtMaxPrice.Text = "";
         }
 
@@ -607,6 +616,9 @@ namespace PerfumeAllocationSystem
             decimal profit = _allocationEngine.GetTotalProfit();
             ShowAllocationDetails(results);
             CreateResultsTab(results, profit);
+
+            // Add the profit summary display
+            DisplayTotalProfitSummary(profit);
         }
 
         private void DisplayResults(List<StoreRequirement> results)
@@ -706,41 +718,143 @@ namespace PerfumeAllocationSystem
             groupBox.Controls.Add(lstPerfumes);
         }
 
+        // Helper method to handle key press events for numeric text boxes
+        private void NumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Allow only digits and control characters
+            if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+
+            // Special handling for "0" - don't allow as first character
+            if (e.KeyChar == '0' && (sender as TextBox).Text.Length == 0)
+            {
+                e.Handled = true;
+            }
+        }
+
+        // Add this method to display a profit summary panel
+        private void DisplayTotalProfitSummary(decimal profit)
+        {
+            // Remove any existing profit panels first
+            foreach (Control ctrl in tabAllocation.Controls)
+            {
+                if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
+                {
+                    tabAllocation.Controls.Remove(ctrl);
+                    ctrl.Dispose();
+                    break;
+                }
+            }
+
+            // Create a profit summary panel at the top of the allocation results
+            Panel profitPanel = new Panel
+            {
+                Name = "profitSummaryPanel",
+                Dock = DockStyle.Top,
+                Height = 60,
+                BackColor = Color.FromArgb(60, 60, 100)
+            };
+
+            Label lblProfitTitle = new Label
+            {
+                Text = "ALLOCATION SUMMARY",
+                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(20, 5)
+            };
+
+            Label lblProfitValue = new Label
+            {
+                Text = $"Total Profit: {profit:C}",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(20, 30)
+            };
+
+            Label lblStoreCount = new Label
+            {
+                Text = $"Stores Served: {_storeRequirements.Count}",
+                Font = new Font("Segoe UI", 12),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(300, 30)
+            };
+
+            decimal totalSatisfaction = (decimal)_storeRequirements.Average(s => s.SatisfactionPercentage);
+            Label lblAverageSatisfaction = new Label
+            {
+                Text = $"Average Satisfaction: {totalSatisfaction:F2}%",
+                Font = new Font("Segoe UI", 12),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(500, 30)
+            };
+
+            profitPanel.Controls.Add(lblProfitTitle);
+            profitPanel.Controls.Add(lblProfitValue);
+            profitPanel.Controls.Add(lblStoreCount);
+            profitPanel.Controls.Add(lblAverageSatisfaction);
+
+            // Insert at the top of the panel
+            tabAllocation.Controls.Add(profitPanel);
+            profitPanel.BringToFront();
+        }
+
         private void CreateResultsTab(List<StoreRequirement> results, decimal totalProfit)
         {
             // Create new tab page
             TabPage tabResult = new TabPage($"Results {DateTime.Now.ToString("HH:mm:ss")}");
 
-            // Create a header panel
+            // Create a header panel with detailed profit info
             Panel headerPanel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 40,
+                Height = 120, // Make it taller to fit more stats
                 BackColor = Color.FromArgb(60, 60, 100)
             };
 
-            // Add title and profit info
+            // Add title
             Label lblTitle = new Label
             {
-                Text = "Allocation Results",
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Text = "Allocation Results Summary",
+                Font = new Font("Segoe UI", 14, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(10, 10)
+                Location = new Point(20, 10)
             };
             headerPanel.Controls.Add(lblTitle);
 
-            // Add total profit information
-            Label lblProfit = new Label
+            // Calculate additional statistics
+            int totalItemsRequested = results.Sum(s => s.QuantityNeeded);
+            int totalItemsAllocated = results.Sum(s => s.AllocatedPerfumes.Count);
+            decimal totalBudget = results.Sum(s => s.Budget);
+            decimal totalSpent = results.Sum(s => s.TotalSpent);
+            double avgSatisfaction = results.Average(s => s.SatisfactionPercentage);
+            int storesAboveTarget = results.Count(s => s.SatisfactionPercentage >= 70.0);
+
+            // Create a table layout for statistics
+            TableLayoutPanel statsTable = new TableLayoutPanel
             {
-                Text = $"Total Profit: {totalProfit:C}",
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.White,
-                AutoSize = true,
-                Location = new Point(500, 10),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right
+                Location = new Point(20, 40),
+                Size = new Size(1000, 70),
+                ColumnCount = 4,
+                RowCount = 2,
+                BackColor = Color.FromArgb(60, 60, 100)
             };
-            headerPanel.Controls.Add(lblProfit);
+
+            AddStatLabel(statsTable, "Total Spent:", $"{totalSpent:C}", 1, 0);
+            AddStatLabel(statsTable, "Remaining Budget:", $"{totalBudget - totalSpent:C}", 1, 1);
+            AddStatLabel(statsTable, "Items Requested:", $"{totalItemsRequested}", 2, 0);
+            AddStatLabel(statsTable, "Items Allocated:", $"{totalItemsAllocated}", 2, 1);
+            AddStatLabel(statsTable, "Stores Above 70%:", $"{storesAboveTarget} of {results.Count}", 3, 0);
+            AddStatLabel(statsTable, "Avg. Satisfaction:", $"{avgSatisfaction:F2}%", 3, 1);
+
+            // Add the table to the header
+            headerPanel.Controls.Add(statsTable);
 
             // Main panel with auto scroll
             Panel mainPanel = new Panel
@@ -912,6 +1026,39 @@ namespace PerfumeAllocationSystem
             // Add tab to control
             tabControl1.TabPages.Add(tabResult);
             tabControl1.SelectedTab = tabResult;
+        }
+
+        // Helper method for the CreateResultsTab method
+        private void AddStatLabel(TableLayoutPanel table, string title, string value, int col, int row, bool isHighlight = false)
+        {
+            Panel statPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                BackColor = isHighlight ? Color.FromArgb(80, 80, 120) : Color.FromArgb(70, 70, 110)
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = title,
+                Font = new Font("Segoe UI", 9),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(5, 5)
+            };
+
+            Label lblValue = new Label
+            {
+                Text = value,
+                Font = new Font("Segoe UI", 11, isHighlight ? FontStyle.Bold : FontStyle.Regular),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(5, 25)
+            };
+
+            statPanel.Controls.Add(lblTitle);
+            statPanel.Controls.Add(lblValue);
+            table.Controls.Add(statPanel, col, row);
         }
 
         // Helper method to generate explanations for low satisfaction

@@ -20,7 +20,7 @@ namespace PerfumeAllocationSystem
         private Label lblRandomStoreMsg;
 
         // Path to the embedded CSV file
-        private const string DEFAULT_CSV_PATH = "complete-fragrance-dataset.csv";
+        private const string DEFAULT_CSV_PATH = "fragrances-database.csv";
 
         public MainForm()
         {

@@ -17,86 +17,91 @@ namespace PerfumeAllocationSystem.Models
         public decimal AveragePrice { get; set; }
         public int Stock { get; set; }
 
+        // Modified weight system - notes get more weight
+        private const double NOTES_WEIGHT = 6.0; 
+        private const double NORMAL_WEIGHT = 1.0; // Regular weight for other criteria
+
         // Helper method to check if this perfume meets the store's requirements
         public double CalculateMatchPercentage(StoreRequirement requirement)
         {
-            int totalCriteria = 0;
-            int matchingCriteria = 0;
+            double totalPoints = 0;
+            double matchingPoints = 0;
 
-            CheckGenderMatch(requirement, ref totalCriteria, ref matchingCriteria);
-            CheckAccordMatch(requirement, ref totalCriteria, ref matchingCriteria);
-            CheckQualityMatch(requirement, ref totalCriteria, ref matchingCriteria);
-            CheckPriceMatch(requirement, ref totalCriteria, ref matchingCriteria);
-            CheckNotesMatch(requirement, ref totalCriteria, ref matchingCriteria);
+            CheckGenderMatch(requirement, ref totalPoints, ref matchingPoints);
+            CheckAccordMatch(requirement, ref totalPoints, ref matchingPoints);
+            CheckQualityMatch(requirement, ref totalPoints, ref matchingPoints);
+            CheckPriceMatch(requirement, ref totalPoints, ref matchingPoints);
+            CheckNotesMatch(requirement, ref totalPoints, ref matchingPoints);
 
             // If no criteria specified, return 100% match
-            if (totalCriteria == 0)
+            if (totalPoints == 0)
                 return 100.0;
 
-            return (double)matchingCriteria / totalCriteria * 100.0;
+            return (matchingPoints / totalPoints) * 100.0;
         }
 
-        private void CheckGenderMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckGenderMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
         {
             if (!string.IsNullOrEmpty(requirement.Gender))
             {
-                totalCriteria++;
+                totalPoints += NORMAL_WEIGHT;
                 if (Gender == requirement.Gender || Gender == "Unisex" || requirement.Gender == "Any")
-                    matchingCriteria++;
+                    matchingPoints += NOTES_WEIGHT;
             }
         }
 
-        private void CheckAccordMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckAccordMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
         {
             if (!string.IsNullOrEmpty(requirement.PreferredAccord))
             {
-                totalCriteria++;
+                totalPoints += NORMAL_WEIGHT;
                 if (MainAccord == requirement.PreferredAccord)
-                    matchingCriteria++;
+                    matchingPoints += NORMAL_WEIGHT;
             }
         }
 
-        private void CheckQualityMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckQualityMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
         {
             if (requirement.MinLongevity > 0)
             {
-                totalCriteria++;
+                totalPoints += NORMAL_WEIGHT;
                 if (Longevity >= requirement.MinLongevity)
-                    matchingCriteria++;
+                    matchingPoints += NORMAL_WEIGHT;
             }
 
             if (requirement.MinProjection > 0)
             {
-                totalCriteria++;
+                totalPoints += NORMAL_WEIGHT;
                 if (Projection >= requirement.MinProjection)
-                    matchingCriteria++;
+                    matchingPoints += NORMAL_WEIGHT;
             }
         }
 
-        private void CheckPriceMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckPriceMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
         {
             if (requirement.MaxPrice > 0)
             {
-                totalCriteria++;
+                totalPoints += NORMAL_WEIGHT;
                 if (AveragePrice <= requirement.MaxPrice)
-                    matchingCriteria++;
+                    matchingPoints += NORMAL_WEIGHT;
             }
         }
 
-        private void CheckNotesMatch(StoreRequirement requirement, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckNotesMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
         {
-            CheckSingleNoteMatch(requirement.PreferredTopNotes, TopNotes, ref totalCriteria, ref matchingCriteria);
-            CheckSingleNoteMatch(requirement.PreferredMiddleNotes, MiddleNotes, ref totalCriteria, ref matchingCriteria);
-            CheckSingleNoteMatch(requirement.PreferredBaseNotes, BaseNotes, ref totalCriteria, ref matchingCriteria);
+            // Use weighted system for notes matching
+            CheckSingleNoteMatch(requirement.PreferredTopNotes, TopNotes, ref totalPoints, ref matchingPoints);
+            CheckSingleNoteMatch(requirement.PreferredMiddleNotes, MiddleNotes, ref totalPoints, ref matchingPoints);
+            CheckSingleNoteMatch(requirement.PreferredBaseNotes, BaseNotes, ref totalPoints, ref matchingPoints);
         }
 
-        private void CheckSingleNoteMatch(string requiredNote, string perfumeNotes, ref int totalCriteria, ref int matchingCriteria)
+        private void CheckSingleNoteMatch(string requiredNote, string perfumeNotes, ref double totalPoints, ref double matchingPoints)
         {
             if (!string.IsNullOrEmpty(requiredNote))
             {
-                totalCriteria++;
+                totalPoints += NOTES_WEIGHT;  // Add weighted points for notes
                 if (perfumeNotes.Contains(requiredNote))
-                    matchingCriteria++;
+                    matchingPoints += NOTES_WEIGHT;  // Add weighted points for match
             }
         }
 

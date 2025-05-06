@@ -39,8 +39,8 @@ namespace PerfumeAllocationSystem
             InitializeComboBoxes();
 
             // Set default values for longevity and projection
-            txtMinLongevity.Text = "1";  // Change from "0" to "1"
-            txtMinProjection.Text = "1";  // Change from "0" to "1"
+            txtMinLongevity.Text = "1";  
+            txtMinProjection.Text = "1";  
 
             // Add validators to prevent entering zero or invalid values
             txtMinLongevity.KeyPress += NumericTextBox_KeyPress;
@@ -73,11 +73,10 @@ namespace PerfumeAllocationSystem
         {
             ApplyButtonStyle(btnAddStore);
             ApplyButtonStyle(btnGenerateRandomStore);
-            ApplyButtonStyle(btnLoadPerfumes);
             ApplyButtonStyle(btnRunAllocation);
-            ApplyButtonStyle(btnSaveResults);
             ApplyButtonStyle(btnClearStores);
             ApplyButtonStyle(btnReset);
+            // Removed btnLoadPerfumes and btnSaveResults references
         }
 
         private void AddRandomStoreMessageLabel()
@@ -340,7 +339,7 @@ namespace PerfumeAllocationSystem
 
         private void ShowDefaultFileNotFoundMessage()
         {
-            MessageBox.Show($"Default fragrance data file not found! Please place '{DEFAULT_CSV_PATH}' in the application folder or load a CSV file manually.",
+            MessageBox.Show($"Default fragrance data file not found! Please place '{DEFAULT_CSV_PATH}' in the application folder.",
                 "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
@@ -350,23 +349,7 @@ namespace PerfumeAllocationSystem
                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void btnLoadPerfumes_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                ConfigureOpenFileDialog(openFileDialog);
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    LoadCsvFile(openFileDialog.FileName);
-                }
-            }
-        }
-
-        private void ConfigureOpenFileDialog(OpenFileDialog openFileDialog)
-        {
-            openFileDialog.Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
-            openFileDialog.Title = "Select Perfume Dataset";
-        }
+        // Removed the btnLoadPerfumes_Click method entirely
 
         private void btnAddStore_Click(object sender, EventArgs e)
         {
@@ -398,10 +381,55 @@ namespace PerfumeAllocationSystem
             if (!ValidateNumericInput(txtMaxPrice.Text, "maximum price", out decimal maxPrice) || maxPrice <= 0)
                 return false;
 
+            // Add minimum price check - important new validation!
+            if (maxPrice < GetMinimumPerfumePrice())
+            {
+                MessageBox.Show($"Maximum price is too low. Minimum perfume price is ${GetMinimumPerfumePrice()}",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             if (!ValidateLongevityProjection())
                 return false;
 
+            // Check if the criteria are too restrictive
+            if (CheckIfCriteriaTooRestrictive())
+            {
+                var result = MessageBox.Show("The criteria you've entered are very restrictive. You might want to relax some requirements.\n" +
+                    "Do you want to continue anyway?",
+                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.No)
+                    return false;
+            }
+
             return true;
+        }
+        private decimal GetMinimumPerfumePrice()
+        {
+            if (_perfumes.Count == 0) return 0;
+            return _perfumes.Min(p => p.AveragePrice);
+        }
+
+        private bool CheckIfCriteriaTooRestrictive()
+        {
+            // Check if there are at least some perfumes that match the basic criteria
+            decimal maxPrice = decimal.Parse(txtMaxPrice.Text);
+            int minLongevity = int.Parse(txtMinLongevity.Text);
+            int minProjection = int.Parse(txtMinProjection.Text);
+            string gender = GetSelectedGender();
+            string accord = GetSelectedAccord();
+
+            int matchCount = _perfumes.Count(p =>
+                p.AveragePrice <= maxPrice &&
+                p.Stock > 0 &&
+                (string.IsNullOrEmpty(gender) || p.Gender == gender || p.Gender == "Unisex") &&
+                (string.IsNullOrEmpty(accord) || p.MainAccord == accord) &&
+                p.Longevity >= minLongevity &&
+                p.Projection >= minProjection
+            );
+
+            return matchCount < 5; // If less than 5 perfumes match, criteria might be too restrictive
         }
 
         private bool ValidateNumericInput(string input, string fieldName, out decimal result)
@@ -549,8 +577,8 @@ namespace PerfumeAllocationSystem
 
         private void GenerateRandomQualitySettings()
         {
-            txtMinLongevity.Text = _random.Next(1, 11).ToString(); // 1-10 instead of 0-10
-            txtMinProjection.Text = _random.Next(1, 11).ToString(); // 1-10 instead of 0-10
+            txtMinLongevity.Text = _random.Next(1, 10).ToString(); // 1-10 instead of 0-10
+            txtMinProjection.Text = _random.Next(1, 10).ToString(); // 1-10 instead of 0-10
             txtMaxPrice.Text = _random.Next(50, 401).ToString(); // $50-$400
         }
 
@@ -610,16 +638,59 @@ namespace PerfumeAllocationSystem
 
         private void RunAllocationProcess()
         {
+            // Before allocation, check if stores have any matching perfumes
+            var problematicStores = new List<string>();
+
+            foreach (var store in _storeRequirements)
+            {
+                int matchingPerfumes = CountMatchingPerfumes(store);
+                if (matchingPerfumes == 0)
+                {
+                    problematicStores.Add(store.StoreName);
+                }
+            }
+
+            if (problematicStores.Any())
+            {
+                string names = string.Join(", ", problematicStores);
+                var result = MessageBox.Show($"Warning: The following stores have no matching perfumes: {names}\n" +
+                    "Consider relaxing their requirements. Do you want to continue anyway?",
+                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.No)
+                    return;
+            }
+
             List<StoreRequirement> results = _allocationEngine.AllocatePerfumes(_storeRequirements);
+
+            // Check for stores with 0% satisfaction after allocation
+            var zeroSatisfactionStores = results.Where(s => s.SatisfactionPercentage == 0).ToList();
+            if (zeroSatisfactionStores.Any())
+            {
+                string names = string.Join(", ", zeroSatisfactionStores.Select(s => s.StoreName));
+                MessageBox.Show($"The following stores received 0% satisfaction: {names}\n" +
+                    "This is likely due to very restrictive criteria or insufficient budget.",
+                    "Allocation Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
             DisplayResults(results);
             EnableResultsFeatures();
             decimal profit = _allocationEngine.GetTotalProfit();
             ShowAllocationDetails(results);
             CreateResultsTab(results, profit);
-
-            // Add the profit summary display
             DisplayTotalProfitSummary(profit);
         }
+        private int CountMatchingPerfumes(StoreRequirement store)
+        {
+            return _perfumes.Count(p =>
+                p.AveragePrice <= store.MaxPrice &&
+                p.Stock > 0 &&
+                (string.IsNullOrEmpty(store.Gender) || p.Gender == store.Gender || p.Gender == "Unisex") &&
+                p.Longevity >= store.MinLongevity &&
+                p.Projection >= store.MinProjection
+            );
+        }
+
 
         private void DisplayResults(List<StoreRequirement> results)
         {
@@ -632,7 +703,7 @@ namespace PerfumeAllocationSystem
 
         private void EnableResultsFeatures()
         {
-            btnSaveResults.Enabled = true;
+            // Removed btnSaveResults.Enabled = true;
         }
 
         private void ShowAllocationDetails(List<StoreRequirement> results)
@@ -1067,58 +1138,80 @@ namespace PerfumeAllocationSystem
             // Base explanation
             string explanation = $"Satisfaction Analysis for {store.StoreName}:\n\n";
 
-            // Check allocated vs requested
-            if (store.AllocatedPerfumes.Count < store.QuantityNeeded)
+            // Check if actually allocated anything
+            if (store.AllocatedPerfumes.Count == 0)
             {
-                explanation += $"• Insufficient quantity: Only allocated {store.AllocatedPerfumes.Count} of {store.QuantityNeeded} requested perfumes.\n\n";
+                explanation += "• NO PERFUMES WERE ALLOCATED\n";
+                explanation += "  This could be due to:\n";
+                explanation += "  - No perfumes match your criteria\n";
+                explanation += "  - Budget is insufficient\n";
+                explanation += "  - All matching perfumes are out of stock\n\n";
+
+                int affordablePerfumes = _perfumes.Count(p => p.AveragePrice <= store.MaxPrice);
+                explanation += $"• Affordable perfumes (within ${store.MaxPrice}): {affordablePerfumes}\n";
+
+                int stockedAndAffordable = _perfumes.Count(p => p.AveragePrice <= store.MaxPrice && p.Stock > 0);
+                explanation += $"• In stock and affordable: {stockedAndAffordable}\n\n";
             }
-
-            // Check budget constraints
-            if (store.RemainingBudget < store.MaxPrice)
+            else
             {
-                explanation += $"• Budget constraints: Remaining budget (${store.RemainingBudget}) is insufficient for additional perfumes.\n\n";
-            }
+                // Check allocated vs requested
+                if (store.AllocatedPerfumes.Count < store.QuantityNeeded)
+                {
+                    explanation += $"• Insufficient quantity: Only allocated {store.AllocatedPerfumes.Count} of {store.QuantityNeeded} requested perfumes.\n\n";
+                }
 
-            // Check preference matches
-            explanation += "• Preference matching issues:\n";
+                // Check budget constraints
+                if (store.RemainingBudget < store.MaxPrice)
+                {
+                    explanation += $"• Budget constraints: Remaining budget (${store.RemainingBudget}) is insufficient for additional perfumes.\n\n";
+                }
 
-            // Check gender preference
-            if (!string.IsNullOrEmpty(store.Gender))
-            {
-                explanation += $"  - Requested gender: {store.Gender}\n";
-            }
+                // Check preference matches
+                explanation += "• Preference matching issues:\n";
 
-            // Check accord preference
-            if (!string.IsNullOrEmpty(store.PreferredAccord))
-            {
-                explanation += $"  - Requested accord: {store.PreferredAccord}\n";
-            }
+                // Check gender preference
+                if (!string.IsNullOrEmpty(store.Gender))
+                {
+                    int matchingGender = store.AllocatedPerfumes.Count(p => p.Gender == store.Gender || p.Gender == "Unisex");
+                    explanation += $"  - Gender match: {matchingGender}/{store.AllocatedPerfumes.Count} perfumes\n";
+                }
 
-            // Check notes preferences
-            if (!string.IsNullOrEmpty(store.PreferredTopNotes) ||
-                !string.IsNullOrEmpty(store.PreferredMiddleNotes) ||
-                !string.IsNullOrEmpty(store.PreferredBaseNotes))
-            {
-                explanation += "  - Requested notes: ";
-                if (!string.IsNullOrEmpty(store.PreferredTopNotes))
-                    explanation += $"Top: {store.PreferredTopNotes} ";
-                if (!string.IsNullOrEmpty(store.PreferredMiddleNotes))
-                    explanation += $"Middle: {store.PreferredMiddleNotes} ";
-                if (!string.IsNullOrEmpty(store.PreferredBaseNotes))
-                    explanation += $"Base: {store.PreferredBaseNotes}";
-                explanation += "\n";
-            }
+                // Check accord preference
+                if (!string.IsNullOrEmpty(store.PreferredAccord))
+                {
+                    int matchingAccord = store.AllocatedPerfumes.Count(p => p.MainAccord == store.PreferredAccord);
+                    explanation += $"  - Accord match: {matchingAccord}/{store.AllocatedPerfumes.Count} perfumes\n";
+                }
 
-            // Check quality requirements
-            if (store.MinLongevity > 0 || store.MinProjection > 0)
-            {
-                explanation += $"  - Quality requirements: Min. Longevity {store.MinLongevity}/10, Min. Projection {store.MinProjection}/10\n";
+                // Check notes preferences
+                if (!string.IsNullOrEmpty(store.PreferredTopNotes) ||
+                    !string.IsNullOrEmpty(store.PreferredMiddleNotes) ||
+                    !string.IsNullOrEmpty(store.PreferredBaseNotes))
+                {
+                    explanation += "  - Requested notes: ";
+                    if (!string.IsNullOrEmpty(store.PreferredTopNotes))
+                        explanation += $"Top: {store.PreferredTopNotes} ";
+                    if (!string.IsNullOrEmpty(store.PreferredMiddleNotes))
+                        explanation += $"Middle: {store.PreferredMiddleNotes} ";
+                    if (!string.IsNullOrEmpty(store.PreferredBaseNotes))
+                        explanation += $"Base: {store.PreferredBaseNotes}";
+                    explanation += "\n";
+                }
+
+                // Check quality requirements
+                if (store.MinLongevity > 0 || store.MinProjection > 0)
+                {
+                    explanation += $"  - Quality requirements: Min. Longevity {store.MinLongevity}/10, Min. Projection {store.MinProjection}/10\n";
+                }
             }
 
             explanation += "\nPossible solutions for next time:\n";
             explanation += "• Stock more perfumes matching these preferences\n";
             explanation += "• Suggest alternative perfumes with similar profiles\n";
-            explanation += "• Consider adjusting the store's expectations or budget";
+            explanation += "• Consider adjusting the store's expectations or budget\n";
+            explanation += "• Try increasing the maximum price limit\n";
+            explanation += "• Reduce the minimum requirements for longevity and projection";
 
             return explanation;
         }
@@ -1133,34 +1226,7 @@ namespace PerfumeAllocationSystem
             return Color.FromArgb(231, 76, 60); // Red
         }
 
-        private void btnSaveResults_Click(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                ConfigureSaveFileDialog(saveFileDialog);
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    SaveResultsToFile(saveFileDialog.FileName);
-                }
-            }
-        }
-
-        private void ConfigureSaveFileDialog(SaveFileDialog saveFileDialog)
-        {
-            saveFileDialog.Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
-            saveFileDialog.Title = "Save Allocation Results";
-            saveFileDialog.FileName = "PerfumeAllocationResults.csv";
-        }
-
-        private void SaveResultsToFile(string fileName)
-        {
-            if (_dataService.SaveAllocationResultsToCsv(
-                (List<StoreRequirement>)dgvResults.DataSource, fileName))
-            {
-                MessageBox.Show("Results saved successfully", "Success",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
+        // Removed the btnSaveResults_Click method entirely
 
         private void btnClearStores_Click(object sender, EventArgs e)
         {
@@ -1234,7 +1300,7 @@ namespace PerfumeAllocationSystem
             btnAddStore.Enabled = false;
             btnGenerateRandomStore.Enabled = false;
             btnRunAllocation.Enabled = false;
-            btnSaveResults.Enabled = false;
+            // Removed btnSaveResults.Enabled = false;
         }
 
         private void RemoveDynamicTabs()

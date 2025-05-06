@@ -35,7 +35,6 @@ namespace PerfumeAllocationSystem
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPerfumes = new System.Windows.Forms.TabPage();
             this.lblPerfumesSummary = new System.Windows.Forms.Label();
-            this.btnLoadPerfumes = new System.Windows.Forms.Button();
             this.dgvPerfumes = new System.Windows.Forms.DataGridView();
             this.tabStores = new System.Windows.Forms.TabPage();
             this.btnClearStores = new System.Windows.Forms.Button();
@@ -68,7 +67,6 @@ namespace PerfumeAllocationSystem
             this.tabAllocation = new System.Windows.Forms.TabPage();
             this.lblTotalProfit = new System.Windows.Forms.Label();
             this.pnlAllocationDetails = new System.Windows.Forms.Panel();
-            this.btnSaveResults = new System.Windows.Forms.Button();
             this.dgvResults = new System.Windows.Forms.DataGridView();
             this.btnRunAllocation = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
@@ -84,8 +82,8 @@ namespace PerfumeAllocationSystem
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPerfumes);
             this.tabControl1.Controls.Add(this.tabStores);
@@ -100,7 +98,6 @@ namespace PerfumeAllocationSystem
             // tabPerfumes
             // 
             this.tabPerfumes.Controls.Add(this.lblPerfumesSummary);
-            this.tabPerfumes.Controls.Add(this.btnLoadPerfumes);
             this.tabPerfumes.Controls.Add(this.dgvPerfumes);
             this.tabPerfumes.Location = new System.Drawing.Point(4, 25);
             this.tabPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -121,22 +118,10 @@ namespace PerfumeAllocationSystem
             this.lblPerfumesSummary.Size = new System.Drawing.Size(0, 16);
             this.lblPerfumesSummary.TabIndex = 2;
             // 
-            // btnLoadPerfumes
-            // 
-            this.btnLoadPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoadPerfumes.Location = new System.Drawing.Point(1253, 679);
-            this.btnLoadPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnLoadPerfumes.Name = "btnLoadPerfumes";
-            this.btnLoadPerfumes.Size = new System.Drawing.Size(141, 28);
-            this.btnLoadPerfumes.TabIndex = 1;
-            this.btnLoadPerfumes.Text = "Load CSV";
-            this.btnLoadPerfumes.UseVisualStyleBackColor = true;
-            this.btnLoadPerfumes.Click += new System.EventHandler(this.btnLoadPerfumes_Click);
-            // 
             // dgvPerfumes
             // 
-            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvPerfumes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvPerfumes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -175,8 +160,8 @@ namespace PerfumeAllocationSystem
             // 
             // dgvStores
             // 
-            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvStores.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvStores.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -189,7 +174,7 @@ namespace PerfumeAllocationSystem
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.btnGenerateRandomStore);
             this.groupBox1.Controls.Add(this.label10);
@@ -456,7 +441,6 @@ namespace PerfumeAllocationSystem
             // 
             this.tabAllocation.Controls.Add(this.lblTotalProfit);
             this.tabAllocation.Controls.Add(this.pnlAllocationDetails);
-            this.tabAllocation.Controls.Add(this.btnSaveResults);
             this.tabAllocation.Controls.Add(this.dgvResults);
             this.tabAllocation.Controls.Add(this.btnRunAllocation);
             this.tabAllocation.Location = new System.Drawing.Point(4, 25);
@@ -481,7 +465,7 @@ namespace PerfumeAllocationSystem
             // 
             // pnlAllocationDetails
             // 
-            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlAllocationDetails.AutoScroll = true;
             this.pnlAllocationDetails.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -491,23 +475,10 @@ namespace PerfumeAllocationSystem
             this.pnlAllocationDetails.Size = new System.Drawing.Size(1381, 235);
             this.pnlAllocationDetails.TabIndex = 3;
             // 
-            // btnSaveResults
-            // 
-            this.btnSaveResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSaveResults.Enabled = false;
-            this.btnSaveResults.Location = new System.Drawing.Point(1263, 679);
-            this.btnSaveResults.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnSaveResults.Name = "btnSaveResults";
-            this.btnSaveResults.Size = new System.Drawing.Size(129, 28);
-            this.btnSaveResults.TabIndex = 2;
-            this.btnSaveResults.Text = "Save Results";
-            this.btnSaveResults.UseVisualStyleBackColor = true;
-            this.btnSaveResults.Click += new System.EventHandler(this.btnSaveResults_Click);
-            // 
             // dgvResults
             // 
-            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvResults.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -571,7 +542,6 @@ namespace PerfumeAllocationSystem
 
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPerfumes;
-        private System.Windows.Forms.Button btnLoadPerfumes;
         private System.Windows.Forms.DataGridView dgvPerfumes;
         private System.Windows.Forms.TabPage tabStores;
         private System.Windows.Forms.TabPage tabAllocation;
@@ -603,7 +573,6 @@ namespace PerfumeAllocationSystem
         private System.Windows.Forms.Button btnClearStores;
         private System.Windows.Forms.Button btnRunAllocation;
         private System.Windows.Forms.DataGridView dgvResults;
-        private System.Windows.Forms.Button btnSaveResults;
         private System.Windows.Forms.Panel pnlAllocationDetails;
         private System.Windows.Forms.Label lblTotalProfit;
         private System.Windows.Forms.Label lblPerfumesSummary;

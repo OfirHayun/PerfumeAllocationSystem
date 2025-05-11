@@ -39,8 +39,8 @@ namespace PerfumeAllocationSystem
             InitializeComboBoxes();
 
             // Set default values for longevity and projection
-            txtMinLongevity.Text = "1";  
-            txtMinProjection.Text = "1";  
+            txtMinLongevity.Text = "1";
+            txtMinProjection.Text = "1";
 
             // Add validators to prevent entering zero or invalid values
             txtMinLongevity.KeyPress += NumericTextBox_KeyPress;
@@ -316,12 +316,88 @@ namespace PerfumeAllocationSystem
                 else
                 {
                     ShowDefaultFileNotFoundMessage();
+
+                    // Create a small test dataset to allow the application to function
+                    // even if the CSV file is missing
+                    CreateDefaultPerfumeData();
+                }
+
+                // Ensure the allocation engine is always created if we have perfumes
+                if (_allocationEngine == null && _perfumes.Count > 0)
+                {
+                    _allocationEngine = new AllocationEngine(_perfumes);
+                    lblPerfumesSummary.Text = $"Loaded {_perfumes.Count} perfumes";
+                    btnAddStore.Enabled = true;
+                    btnGenerateRandomStore.Enabled = true;
                 }
             }
             catch (Exception ex)
             {
                 ShowLoadErrorMessage(ex);
+                // Create minimal perfume data to allow the app to function
+                CreateDefaultPerfumeData();
             }
+        }
+
+        // This method creates a minimal set of test perfumes if the CSV file is missing
+        private void CreateDefaultPerfumeData()
+        {
+            _perfumes = new List<Perfume>();
+
+            // Add a few sample perfumes
+            _perfumes.Add(new Perfume
+            {
+                Name = "Sample Perfume 1",
+                Brand = "Test Brand",
+                Gender = "Male",
+                TopNotes = "Citrus, Bergamot",
+                MiddleNotes = "Lavender, Rosemary",
+                BaseNotes = "Amber, Musk",
+                MainAccord = "Aromatic",
+                Longevity = 7,
+                Projection = 6,
+                AveragePrice = 85.0m,
+                Stock = 10
+            });
+
+            _perfumes.Add(new Perfume
+            {
+                Name = "Sample Perfume 2",
+                Brand = "Test Brand",
+                Gender = "Female",
+                TopNotes = "Rose, Violet",
+                MiddleNotes = "Jasmine, Ylang-ylang",
+                BaseNotes = "Vanilla, Sandalwood",
+                MainAccord = "Floral",
+                Longevity = 6,
+                Projection = 5,
+                AveragePrice = 95.0m,
+                Stock = 8
+            });
+
+            _perfumes.Add(new Perfume
+            {
+                Name = "Sample Perfume 3",
+                Brand = "Test Brand",
+                Gender = "Unisex",
+                TopNotes = "Cedar, Pine",
+                MiddleNotes = "Patchouli, Vetiver",
+                BaseNotes = "Leather, Tobacco",
+                MainAccord = "Woody",
+                Longevity = 8,
+                Projection = 7,
+                AveragePrice = 110.0m,
+                Stock = 5
+            });
+
+            // Update the data grid and create an allocation engine
+            dgvPerfumes.DataSource = null;
+            dgvPerfumes.DataSource = _perfumes;
+            _allocationEngine = new AllocationEngine(_perfumes);
+
+            lblPerfumesSummary.Text = $"Using {_perfumes.Count} sample perfumes (CSV file not found)";
+            btnAddStore.Enabled = true;
+            btnGenerateRandomStore.Enabled = true;
         }
 
         private void LoadCsvFile(string filePath)
@@ -330,6 +406,7 @@ namespace PerfumeAllocationSystem
             dgvPerfumes.DataSource = null;
             dgvPerfumes.DataSource = _perfumes;
 
+            // Make sure we always create the allocation engine
             _allocationEngine = new AllocationEngine(_perfumes);
             lblPerfumesSummary.Text = $"Loaded {_perfumes.Count} perfumes";
 
@@ -409,6 +486,18 @@ namespace PerfumeAllocationSystem
         {
             if (_perfumes.Count == 0) return 0;
             return _perfumes.Min(p => p.AveragePrice);
+        }
+
+        private decimal GetAveragePerfumePrice()
+        {
+            if (_perfumes.Count == 0) return 100m; // Default fallback
+            return _perfumes.Average(p => p.AveragePrice);
+        }
+
+        private decimal GetMaximumPerfumePrice()
+        {
+            if (_perfumes.Count == 0) return 400m; // Default fallback
+            return _perfumes.Max(p => p.AveragePrice);
         }
 
         private bool CheckIfCriteriaTooRestrictive()
@@ -519,67 +608,136 @@ namespace PerfumeAllocationSystem
         {
             GenerateBasicStoreInfo();
             GenerateRandomNotes();
-            GenerateRandomQualitySettings();
+            GenerateImprovedQualitySettings();
         }
 
         private void GenerateBasicStoreInfo()
         {
             txtStoreName.Text = $"Store_{_random.Next(1, 1000)}";
-            txtBudget.Text = _random.Next(500, 5001).ToString();
-            txtQuantity.Text = _random.Next(5, 21).ToString();
 
-            string[] genders = { "Any", "Male", "Female", "Unisex" };
+            // Increase budget range for better allocation possibilities
+            txtBudget.Text = _random.Next(800, 8001).ToString();
+
+            // Slightly lower quantity requests to balance with budget
+            txtQuantity.Text = _random.Next(3, 15).ToString();
+
+            // Higher chance of selecting "Any" gender for more flexibility
+            string[] genders = { "Any", "Any", "Any", "Male", "Female", "Unisex" };
             cboGender.SelectedItem = genders[_random.Next(genders.Length)];
 
+            // Higher chance of selecting "Any" accord for more flexibility
             string[] accords = {
-                "Any", "Aromatic", "Woody", "Fresh", "Sweet", "Floral", "Citrus",
-                "Oriental", "Fruity", "Spicy", "Gourmand", "Leather", "Tobacco"
+                "Any", "Any", "Any", "Any", // Added more "Any" options to increase probability
+                "Aromatic", "Woody", "Fresh", "Sweet", "Floral", "Citrus",
+                "Oriental", "Fruity", "Spicy"
             };
             cboAccord.SelectedItem = accords[_random.Next(accords.Length)];
         }
 
         private void GenerateRandomNotes()
         {
+            // 40% chance of having no specific notes requirement
+            if (_random.Next(100) < 40)
+            {
+                txtTopNotes.Text = "";
+                txtMiddleNotes.Text = "";
+                txtBaseNotes.Text = "";
+                return;
+            }
+
             string topNote = "";
             string middleNote = "";
             string baseNote = "";
 
             if (_perfumes.Count > 0)
             {
-                ExtractRandomNotesFromPerfumes(ref topNote, ref middleNote, ref baseNote);
+                // Get the most common notes to increase match probability
+                ExtractCommonNotesFromPerfumes(ref topNote, ref middleNote, ref baseNote);
             }
 
-            txtTopNotes.Text = topNote;
-            txtMiddleNotes.Text = middleNote;
-            txtBaseNotes.Text = baseNote;
+            // 50% chance for each note to be used (allows for partial notes specification)
+            txtTopNotes.Text = _random.Next(100) < 50 ? topNote : "";
+            txtMiddleNotes.Text = _random.Next(100) < 50 ? middleNote : "";
+            txtBaseNotes.Text = _random.Next(100) < 50 ? baseNote : "";
         }
 
-        private void ExtractRandomNotesFromPerfumes(ref string topNote, ref string middleNote, ref string baseNote)
+        private void ExtractCommonNotesFromPerfumes(ref string topNote, ref string middleNote, ref string baseNote)
         {
-            var randomPerfume1 = _perfumes[_random.Next(_perfumes.Count)];
-            var randomPerfume2 = _perfumes[_random.Next(_perfumes.Count)];
-            var randomPerfume3 = _perfumes[_random.Next(_perfumes.Count)];
+            // Sample multiple perfumes to find common notes
+            var sampleSize = Math.Min(10, _perfumes.Count);
+            var samplePerfumes = new List<Perfume>();
 
-            ExtractRandomNote(randomPerfume1.TopNotes, ref topNote);
-            ExtractRandomNote(randomPerfume2.MiddleNotes, ref middleNote);
-            ExtractRandomNote(randomPerfume3.BaseNotes, ref baseNote);
+            // Take a random sample of perfumes
+            for (int i = 0; i < sampleSize; i++)
+            {
+                samplePerfumes.Add(_perfumes[_random.Next(_perfumes.Count)]);
+            }
+
+            // Extract and count top notes
+            var topNotes = new Dictionary<string, int>();
+            var middleNotes = new Dictionary<string, int>();
+            var baseNotes = new Dictionary<string, int>();
+
+            foreach (var perfume in samplePerfumes)
+            {
+                ProcessNotes(perfume.TopNotes, topNotes);
+                ProcessNotes(perfume.MiddleNotes, middleNotes);
+                ProcessNotes(perfume.BaseNotes, baseNotes);
+            }
+
+            // Select most common notes
+            topNote = GetMostCommonNote(topNotes);
+            middleNote = GetMostCommonNote(middleNotes);
+            baseNote = GetMostCommonNote(baseNotes);
         }
 
-        private void ExtractRandomNote(string notesList, ref string selectedNote)
+        private void ProcessNotes(string notesList, Dictionary<string, int> noteCount)
         {
             if (!string.IsNullOrEmpty(notesList))
             {
                 string[] notes = notesList.Split(',');
-                if (notes.Length > 0)
-                    selectedNote = notes[0].Trim();
+                foreach (var note in notes)
+                {
+                    string trimmedNote = note.Trim();
+                    if (!string.IsNullOrEmpty(trimmedNote))
+                    {
+                        if (noteCount.ContainsKey(trimmedNote))
+                            noteCount[trimmedNote]++;
+                        else
+                            noteCount[trimmedNote] = 1;
+                    }
+                }
             }
         }
 
-        private void GenerateRandomQualitySettings()
+        private string GetMostCommonNote(Dictionary<string, int> noteCount)
         {
-            txtMinLongevity.Text = _random.Next(1, 10).ToString(); // 1-10 instead of 0-10
-            txtMinProjection.Text = _random.Next(1, 10).ToString(); // 1-10 instead of 0-10
-            txtMaxPrice.Text = _random.Next(50, 401).ToString(); // $50-$400
+            if (noteCount.Count == 0)
+                return "";
+
+            return noteCount.OrderByDescending(x => x.Value).First().Key;
+        }
+
+        private void GenerateImprovedQualitySettings()
+        {
+            // Lower minimum requirements for better match probability
+            txtMinLongevity.Text = _random.Next(1, 5).ToString(); // 1-4 instead of 1-10
+            txtMinProjection.Text = _random.Next(1, 5).ToString(); // 1-4 instead of 1-10
+
+            // Ensure max price is reasonable based on available perfumes
+            decimal minPrice = GetMinimumPerfumePrice();
+            decimal avgPrice = GetAveragePerfumePrice();
+            decimal maxPrice = GetMaximumPerfumePrice();
+
+            // Set price slightly above average to ensure good matching
+            // but avoid extremely high prices that might be unrealistic
+            decimal targetPrice = Math.Min(avgPrice * 1.5m, maxPrice);
+            targetPrice = Math.Max(targetPrice, minPrice * 1.2m); // Ensure it's at least 20% above min price
+
+            // Round to nearest $10
+            targetPrice = Math.Round(targetPrice / 10) * 10;
+
+            txtMaxPrice.Text = targetPrice.ToString();
         }
 
         private void ShowRandomGenerationMessage()
@@ -638,6 +796,20 @@ namespace PerfumeAllocationSystem
 
         private void RunAllocationProcess()
         {
+            // Additional check to ensure the allocation engine is initialized
+            if (_allocationEngine == null && _perfumes.Count > 0)
+            {
+                _allocationEngine = new AllocationEngine(_perfumes);
+            }
+
+            // Verify again that we have an allocation engine
+            if (_allocationEngine == null)
+            {
+                MessageBox.Show("Cannot run allocation - perfume data could not be loaded. Please check that the CSV file exists.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // Before allocation, check if stores have any matching perfumes
             var problematicStores = new List<string>();
 
@@ -1245,29 +1417,99 @@ namespace PerfumeAllocationSystem
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
         }
 
+        // Enhanced PerformFullReset method to properly clear ALL allocation data
+        private void PerformFullReset()
+        {
+            // Clear data collections
+            ClearCollections();
+
+            // Clear data grids
+            ClearDataGrids();
+
+            // Clear panels and results
+            ClearAllocationResults();
+
+            // Reset labels
+            ResetLabels();
+
+            // Disable buttons
+            DisableButtons();
+
+            // Remove dynamic tabs
+            RemoveDynamicTabs();
+
+            // Ensure we have a new DataService
+            _dataService = new DataService();
+
+            // Switch to the first tab
+            tabControl1.SelectedIndex = 0;
+        }
+
+        // New method to thoroughly clear all allocation results
+        private void ClearAllocationResults()
+        {
+            // Clear the details panel
+            pnlAllocationDetails.Controls.Clear();
+
+            // Remove profit summary panel if it exists
+            foreach (Control ctrl in tabAllocation.Controls)
+            {
+                if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
+                {
+                    tabAllocation.Controls.Remove(ctrl);
+                    ctrl.Dispose();
+                    break;
+                }
+            }
+
+            // Clear any data binding
+            dgvResults.DataSource = null;
+
+            // Reset profit
+            lblTotalProfit.Text = "Total Profit: $0.00";
+        }
+
+        // Modified btnReset_Click method to ensure all UI is updated after reset
         private void btnReset_Click(object sender, EventArgs e)
         {
             if (ConfirmReset())
             {
                 PerformFullReset();
                 LoadDefaultCsvData();
+
+                // Force refresh the UI
+                Application.DoEvents();
+
+                // Focus on the first tab and update display
+                tabControl1.SelectedIndex = 0;
+                UpdateDisplay();
             }
+        }
+
+        // New method to update the display after major changes
+        private void UpdateDisplay()
+        {
+            // Clear and refresh data grids
+            dgvPerfumes.Refresh();
+            dgvStores.Refresh();
+            dgvResults.Refresh();
+
+            // Update total profit display
+            lblTotalProfit.Text = "Total Profit: $0.00";
+
+            // Force redraw of the allocation panel
+            pnlAllocationDetails.Invalidate();
+            pnlAllocationDetails.Update();
+
+            // Update tab control display
+            tabControl1.Invalidate();
+            tabControl1.Update();
         }
 
         private bool ConfirmReset()
         {
             return MessageBox.Show("Are you sure you want to reset everything?", "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-        }
-
-        private void PerformFullReset()
-        {
-            ClearCollections();
-            ClearDataGrids();
-            ClearDetailPanels();
-            ResetLabels();
-            DisableButtons();
-            RemoveDynamicTabs();
         }
 
         private void ClearCollections()

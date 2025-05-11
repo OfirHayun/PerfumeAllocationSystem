@@ -18,7 +18,7 @@ namespace PerfumeAllocationSystem.Models
         public int Stock { get; set; }
 
         // Modified weight system - notes get more weight
-        private const double NOTES_WEIGHT = 6.0; 
+        private const double NOTES_WEIGHT = 1.0; 
         private const double NORMAL_WEIGHT = 1.0; // Regular weight for other criteria
 
         // Helper method to check if this perfume meets the store's requirements

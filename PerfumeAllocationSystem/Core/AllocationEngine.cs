@@ -11,7 +11,7 @@ namespace PerfumeAllocationSystem.Core
         private Dictionary<string, Perfume> _perfumeInventory = new Dictionary<string, Perfume>();
 
         // Reduced minimum satisfaction required to find good matches more easily
-        private const double MinimumSatisfactionRequired = 60.0; // Was 70.0
+        private const double MinimumSatisfactionRequired = 55.0; 
 
         // Still aim for 70% as target but allow lower to start with
         private const double TargetSatisfactionGoal = 70.0;
@@ -129,12 +129,19 @@ namespace PerfumeAllocationSystem.Core
 
         private void AllocateBestMatches(StoreRequirement store, Dictionary<string, Perfume> inventory, List<Tuple<double, Perfume>> perfumeHeap)
         {
-            while (store.RemainingQuantity > 0 && perfumeHeap.Count > 0)
-            {
-                var bestMatch = perfumeHeap[0];
-                perfumeHeap.RemoveAt(0);
+            // Iterate only while there's remaining quantity and perfumes in the heap
+            var eligibleMatches = perfumeHeap
+                .Where(match => store.RemainingQuantity > 0)
+                .ToList();
 
+            foreach (var bestMatch in eligibleMatches)
+            {
                 Perfume perfume = bestMatch.Item2;
+                if (store.RemainingQuantity <= 0)
+                {
+                    return; 
+                }
+
                 if (perfume.AveragePrice <= store.RemainingBudget)
                 {
                     AllocatePerfumeToStore(store, inventory, bestMatch, perfume);
@@ -191,16 +198,14 @@ namespace PerfumeAllocationSystem.Core
 
         private void AllocateAlternatives(StoreRequirement store, Dictionary<string, Perfume> inventory, List<Tuple<double, Perfume>> alternativePerfumes)
         {
-            foreach (var altMatch in alternativePerfumes)
-            {
-                if (store.RemainingQuantity <= 0)
-                    break;
+            
+            var eligibleAlternatives = alternativePerfumes
+                .TakeWhile(_ => store.RemainingQuantity > 0)
+                .Where(altMatch => altMatch.Item2.AveragePrice <= store.RemainingBudget);
 
-                Perfume perfume = altMatch.Item2;
-                if (perfume.AveragePrice <= store.RemainingBudget)
-                {
-                    AllocateAlternativePerfume(store, inventory, perfume);
-                }
+            foreach (var altMatch in eligibleAlternatives)
+            {
+                AllocateAlternativePerfume(store, inventory, altMatch.Item2);
             }
         }
 
@@ -241,6 +246,7 @@ namespace PerfumeAllocationSystem.Core
             // Try to replace bottom 25% of perfumes
             int replacementCount = Math.Max(1, allocatedByPerformance.Count / 4);
 
+            // Process only the number of replacements we need
             for (int i = 0; i < replacementCount && i < allocatedByPerformance.Count; i++)
             {
                 var worstMatch = allocatedByPerformance[i];
@@ -316,10 +322,14 @@ namespace PerfumeAllocationSystem.Core
             double totalSatisfaction = 0;
             foreach (var perfume in store.AllocatedPerfumes)
             {
-                totalSatisfaction += perfume.CalculateMatchPercentage(store);
+                // Cap individual perfume satisfaction at 100% if needed
+                double perfumeSatisfaction = Math.Min(perfume.CalculateMatchPercentage(store), 100.0);
+                totalSatisfaction += perfumeSatisfaction;
             }
 
-            store.SatisfactionPercentage = totalSatisfaction / store.AllocatedPerfumes.Count;
+            // Calculate average satisfaction and cap at 100%
+            double avgSatisfaction = totalSatisfaction / store.AllocatedPerfumes.Count;
+            store.SatisfactionPercentage = Math.Min(avgSatisfaction, 100.0); // Ensure we never exceed 100%
         }
 
         // Get our total profit from the allocation

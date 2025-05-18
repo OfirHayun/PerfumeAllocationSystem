@@ -1135,18 +1135,25 @@ namespace PerfumeAllocationSystem
             }
         }
 
-        // Add this method to display a profit summary panel
         private void DisplayTotalProfitSummary(decimal profit)
         {
             // Remove any existing profit panels first
+            Panel panelToRemove = null;
+
+            // First, find the panel (if it exists)
             foreach (Control ctrl in tabAllocation.Controls)
             {
                 if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
                 {
-                    tabAllocation.Controls.Remove(ctrl);
-                    ctrl.Dispose();
-                    break;
+                    panelToRemove = (Panel)ctrl;
                 }
+            }
+
+            // Then, remove it if found
+            if (panelToRemove != null)
+            {
+                tabAllocation.Controls.Remove(panelToRemove);
+                panelToRemove.Dispose();
             }
 
             // Create a profit summary panel at the top of the allocation results
@@ -1639,7 +1646,6 @@ namespace PerfumeAllocationSystem
             // Switch to the first tab
             tabControl1.SelectedIndex = 0;
         }
-
         // New method to thoroughly clear all allocation results
         private void ClearAllocationResults()
         {
@@ -1647,14 +1653,22 @@ namespace PerfumeAllocationSystem
             pnlAllocationDetails.Controls.Clear();
 
             // Remove profit summary panel if it exists
+            Panel panelToRemove = null;
+
+            // First, find the panel (if it exists)
             foreach (Control ctrl in tabAllocation.Controls)
             {
                 if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
                 {
-                    tabAllocation.Controls.Remove(ctrl);
-                    ctrl.Dispose();
-                    break;
+                    panelToRemove = (Panel)ctrl;
                 }
+            }
+
+            // Then, remove it if found
+            if (panelToRemove != null)
+            {
+                tabAllocation.Controls.Remove(panelToRemove);
+                panelToRemove.Dispose();
             }
 
             // Clear any data binding

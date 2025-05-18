@@ -18,7 +18,7 @@ namespace PerfumeAllocationSystem.Models
         public int Stock { get; set; }
 
         // Modified weight system - notes get more weight
-        private const double NOTES_WEIGHT = 1.0; 
+    
         private const double NORMAL_WEIGHT = 1.0; // Regular weight for other criteria
 
         // Helper method to check if this perfume meets the store's requirements
@@ -33,11 +33,17 @@ namespace PerfumeAllocationSystem.Models
             CheckPriceMatch(requirement, ref totalPoints, ref matchingPoints);
             CheckNotesMatch(requirement, ref totalPoints, ref matchingPoints);
 
-            // If no criteria specified, return 100% match
+            // If no criteria specified, return a more realistic value instead of 100%
+            // This makes it more realistic - even with no requirements, not every perfume is perfect
             if (totalPoints == 0)
-                return 100.0;
+                return 70.0 + (new Random().NextDouble() * 20.0); // Random between 70-90%
 
-            return (matchingPoints / totalPoints) * 100.0;
+            // Apply a small random factor to make satisfaction values more varied
+            double basePercentage = (matchingPoints / totalPoints) * 100.0;
+            double randomVariation = (new Random().NextDouble() * 10.0) - 5.0; // Random between -5 and +5
+
+            // Ensure we stay within 0-100% range after applying random variation
+            return Math.Max(0, Math.Min(100, basePercentage + randomVariation));
         }
 
         private void CheckGenderMatch(StoreRequirement requirement, ref double totalPoints, ref double matchingPoints)
@@ -46,7 +52,7 @@ namespace PerfumeAllocationSystem.Models
             {
                 totalPoints += NORMAL_WEIGHT;
                 if (Gender == requirement.Gender || Gender == "Unisex" || requirement.Gender == "Any")
-                    matchingPoints += NOTES_WEIGHT;
+                    matchingPoints += NORMAL_WEIGHT;
             }
         }
 
@@ -99,9 +105,9 @@ namespace PerfumeAllocationSystem.Models
         {
             if (!string.IsNullOrEmpty(requiredNote))
             {
-                totalPoints += NOTES_WEIGHT;  // Add weighted points for notes
+                totalPoints += NORMAL_WEIGHT;  // Add weighted points for notes
                 if (perfumeNotes.Contains(requiredNote))
-                    matchingPoints += NOTES_WEIGHT;  // Add weighted points for match
+                    matchingPoints += NORMAL_WEIGHT;  // Add weighted points for match
             }
         }
 

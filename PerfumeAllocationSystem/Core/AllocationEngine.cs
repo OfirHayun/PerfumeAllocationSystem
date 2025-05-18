@@ -11,7 +11,7 @@ namespace PerfumeAllocationSystem.Core
         private Dictionary<string, Perfume> _perfumeInventory = new Dictionary<string, Perfume>();
 
         // Reduced minimum satisfaction required to find good matches more easily
-        private const double MinimumSatisfactionRequired = 55.0; 
+        private const double MinimumSatisfactionRequired = 60.0; 
 
         // Still aim for 70% as target but allow lower to start with
         private const double TargetSatisfactionGoal = 70.0;

@@ -82,14 +82,14 @@ namespace PerfumeAllocationSystem
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPerfumes);
             this.tabControl1.Controls.Add(this.tabStores);
             this.tabControl1.Controls.Add(this.tabAllocation);
             this.tabControl1.Location = new System.Drawing.Point(16, 15);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1413, 747);
@@ -100,9 +100,9 @@ namespace PerfumeAllocationSystem
             this.tabPerfumes.Controls.Add(this.lblPerfumesSummary);
             this.tabPerfumes.Controls.Add(this.dgvPerfumes);
             this.tabPerfumes.Location = new System.Drawing.Point(4, 25);
-            this.tabPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPerfumes.Margin = new System.Windows.Forms.Padding(4);
             this.tabPerfumes.Name = "tabPerfumes";
-            this.tabPerfumes.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPerfumes.Padding = new System.Windows.Forms.Padding(4);
             this.tabPerfumes.Size = new System.Drawing.Size(1405, 718);
             this.tabPerfumes.TabIndex = 0;
             this.tabPerfumes.Text = "Perfume Inventory";
@@ -120,17 +120,18 @@ namespace PerfumeAllocationSystem
             // 
             // dgvPerfumes
             // 
-            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvPerfumes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvPerfumes.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvPerfumes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvPerfumes.Location = new System.Drawing.Point(8, 7);
-            this.dgvPerfumes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvPerfumes.Margin = new System.Windows.Forms.Padding(4);
             this.dgvPerfumes.Name = "dgvPerfumes";
             this.dgvPerfumes.RowHeadersWidth = 51;
             this.dgvPerfumes.Size = new System.Drawing.Size(1387, 665);
             this.dgvPerfumes.TabIndex = 0;
+            this.dgvPerfumes.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPerfumes_CellContentClick);
             // 
             // tabStores
             // 
@@ -138,9 +139,9 @@ namespace PerfumeAllocationSystem
             this.tabStores.Controls.Add(this.dgvStores);
             this.tabStores.Controls.Add(this.groupBox1);
             this.tabStores.Location = new System.Drawing.Point(4, 25);
-            this.tabStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabStores.Margin = new System.Windows.Forms.Padding(4);
             this.tabStores.Name = "tabStores";
-            this.tabStores.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabStores.Padding = new System.Windows.Forms.Padding(4);
             this.tabStores.Size = new System.Drawing.Size(1405, 718);
             this.tabStores.TabIndex = 1;
             this.tabStores.Text = "Store Requirements";
@@ -150,7 +151,7 @@ namespace PerfumeAllocationSystem
             // 
             this.btnClearStores.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClearStores.Location = new System.Drawing.Point(1253, 679);
-            this.btnClearStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnClearStores.Margin = new System.Windows.Forms.Padding(4);
             this.btnClearStores.Name = "btnClearStores";
             this.btnClearStores.Size = new System.Drawing.Size(141, 28);
             this.btnClearStores.TabIndex = 3;
@@ -160,13 +161,13 @@ namespace PerfumeAllocationSystem
             // 
             // dgvStores
             // 
-            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvStores.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvStores.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvStores.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvStores.Location = new System.Drawing.Point(504, 7);
-            this.dgvStores.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvStores.Margin = new System.Windows.Forms.Padding(4);
             this.dgvStores.Name = "dgvStores";
             this.dgvStores.RowHeadersWidth = 51;
             this.dgvStores.Size = new System.Drawing.Size(891, 665);
@@ -174,7 +175,7 @@ namespace PerfumeAllocationSystem
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.btnGenerateRandomStore);
             this.groupBox1.Controls.Add(this.label10);
@@ -201,9 +202,9 @@ namespace PerfumeAllocationSystem
             this.groupBox1.Controls.Add(this.txtStoreName);
             this.groupBox1.Controls.Add(this.btnAddStore);
             this.groupBox1.Location = new System.Drawing.Point(8, 7);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(488, 700);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
@@ -213,7 +214,7 @@ namespace PerfumeAllocationSystem
             // 
             this.btnGenerateRandomStore.Enabled = false;
             this.btnGenerateRandomStore.Location = new System.Drawing.Point(165, 545);
-            this.btnGenerateRandomStore.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnGenerateRandomStore.Margin = new System.Windows.Forms.Padding(4);
             this.btnGenerateRandomStore.Name = "btnGenerateRandomStore";
             this.btnGenerateRandomStore.Size = new System.Drawing.Size(207, 28);
             this.btnGenerateRandomStore.TabIndex = 23;
@@ -234,7 +235,7 @@ namespace PerfumeAllocationSystem
             // txtMaxPrice
             // 
             this.txtMaxPrice.Location = new System.Drawing.Point(165, 455);
-            this.txtMaxPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMaxPrice.Margin = new System.Windows.Forms.Padding(4);
             this.txtMaxPrice.Name = "txtMaxPrice";
             this.txtMaxPrice.Size = new System.Drawing.Size(313, 22);
             this.txtMaxPrice.TabIndex = 21;
@@ -252,7 +253,7 @@ namespace PerfumeAllocationSystem
             // txtMinProjection
             // 
             this.txtMinProjection.Location = new System.Drawing.Point(165, 423);
-            this.txtMinProjection.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMinProjection.Margin = new System.Windows.Forms.Padding(4);
             this.txtMinProjection.Name = "txtMinProjection";
             this.txtMinProjection.Size = new System.Drawing.Size(313, 22);
             this.txtMinProjection.TabIndex = 19;
@@ -271,7 +272,7 @@ namespace PerfumeAllocationSystem
             // txtMinLongevity
             // 
             this.txtMinLongevity.Location = new System.Drawing.Point(165, 391);
-            this.txtMinLongevity.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMinLongevity.Margin = new System.Windows.Forms.Padding(4);
             this.txtMinLongevity.Name = "txtMinLongevity";
             this.txtMinLongevity.Size = new System.Drawing.Size(313, 22);
             this.txtMinLongevity.TabIndex = 17;
@@ -290,7 +291,7 @@ namespace PerfumeAllocationSystem
             // txtBaseNotes
             // 
             this.txtBaseNotes.Location = new System.Drawing.Point(165, 359);
-            this.txtBaseNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtBaseNotes.Margin = new System.Windows.Forms.Padding(4);
             this.txtBaseNotes.Name = "txtBaseNotes";
             this.txtBaseNotes.Size = new System.Drawing.Size(313, 22);
             this.txtBaseNotes.TabIndex = 15;
@@ -308,7 +309,7 @@ namespace PerfumeAllocationSystem
             // txtMiddleNotes
             // 
             this.txtMiddleNotes.Location = new System.Drawing.Point(165, 327);
-            this.txtMiddleNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtMiddleNotes.Margin = new System.Windows.Forms.Padding(4);
             this.txtMiddleNotes.Name = "txtMiddleNotes";
             this.txtMiddleNotes.Size = new System.Drawing.Size(313, 22);
             this.txtMiddleNotes.TabIndex = 13;
@@ -326,7 +327,7 @@ namespace PerfumeAllocationSystem
             // txtTopNotes
             // 
             this.txtTopNotes.Location = new System.Drawing.Point(165, 295);
-            this.txtTopNotes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtTopNotes.Margin = new System.Windows.Forms.Padding(4);
             this.txtTopNotes.Name = "txtTopNotes";
             this.txtTopNotes.Size = new System.Drawing.Size(313, 22);
             this.txtTopNotes.TabIndex = 11;
@@ -346,7 +347,7 @@ namespace PerfumeAllocationSystem
             this.cboAccord.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboAccord.FormattingEnabled = true;
             this.cboAccord.Location = new System.Drawing.Point(165, 262);
-            this.cboAccord.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboAccord.Margin = new System.Windows.Forms.Padding(4);
             this.cboAccord.Name = "cboAccord";
             this.cboAccord.Size = new System.Drawing.Size(313, 24);
             this.cboAccord.TabIndex = 9;
@@ -366,7 +367,7 @@ namespace PerfumeAllocationSystem
             this.cboGender.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboGender.FormattingEnabled = true;
             this.cboGender.Location = new System.Drawing.Point(165, 229);
-            this.cboGender.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cboGender.Margin = new System.Windows.Forms.Padding(4);
             this.cboGender.Name = "cboGender";
             this.cboGender.Size = new System.Drawing.Size(313, 24);
             this.cboGender.TabIndex = 7;
@@ -384,7 +385,7 @@ namespace PerfumeAllocationSystem
             // txtQuantity
             // 
             this.txtQuantity.Location = new System.Drawing.Point(165, 197);
-            this.txtQuantity.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtQuantity.Margin = new System.Windows.Forms.Padding(4);
             this.txtQuantity.Name = "txtQuantity";
             this.txtQuantity.Size = new System.Drawing.Size(313, 22);
             this.txtQuantity.TabIndex = 5;
@@ -402,7 +403,7 @@ namespace PerfumeAllocationSystem
             // txtBudget
             // 
             this.txtBudget.Location = new System.Drawing.Point(165, 165);
-            this.txtBudget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtBudget.Margin = new System.Windows.Forms.Padding(4);
             this.txtBudget.Name = "txtBudget";
             this.txtBudget.Size = new System.Drawing.Size(313, 22);
             this.txtBudget.TabIndex = 3;
@@ -420,7 +421,7 @@ namespace PerfumeAllocationSystem
             // txtStoreName
             // 
             this.txtStoreName.Location = new System.Drawing.Point(165, 133);
-            this.txtStoreName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtStoreName.Margin = new System.Windows.Forms.Padding(4);
             this.txtStoreName.Name = "txtStoreName";
             this.txtStoreName.Size = new System.Drawing.Size(313, 22);
             this.txtStoreName.TabIndex = 1;
@@ -429,7 +430,7 @@ namespace PerfumeAllocationSystem
             // 
             this.btnAddStore.Enabled = false;
             this.btnAddStore.Location = new System.Drawing.Point(165, 510);
-            this.btnAddStore.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnAddStore.Margin = new System.Windows.Forms.Padding(4);
             this.btnAddStore.Name = "btnAddStore";
             this.btnAddStore.Size = new System.Drawing.Size(163, 28);
             this.btnAddStore.TabIndex = 0;
@@ -444,7 +445,7 @@ namespace PerfumeAllocationSystem
             this.tabAllocation.Controls.Add(this.dgvResults);
             this.tabAllocation.Controls.Add(this.btnRunAllocation);
             this.tabAllocation.Location = new System.Drawing.Point(4, 25);
-            this.tabAllocation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabAllocation.Margin = new System.Windows.Forms.Padding(4);
             this.tabAllocation.Name = "tabAllocation";
             this.tabAllocation.Size = new System.Drawing.Size(1405, 718);
             this.tabAllocation.TabIndex = 2;
@@ -465,25 +466,25 @@ namespace PerfumeAllocationSystem
             // 
             // pnlAllocationDetails
             // 
-            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.pnlAllocationDetails.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlAllocationDetails.AutoScroll = true;
             this.pnlAllocationDetails.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlAllocationDetails.Location = new System.Drawing.Point(11, 444);
-            this.pnlAllocationDetails.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlAllocationDetails.Margin = new System.Windows.Forms.Padding(4);
             this.pnlAllocationDetails.Name = "pnlAllocationDetails";
             this.pnlAllocationDetails.Size = new System.Drawing.Size(1381, 235);
             this.pnlAllocationDetails.TabIndex = 3;
             // 
             // dgvResults
             // 
-            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvResults.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvResults.Location = new System.Drawing.Point(11, 50);
-            this.dgvResults.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dgvResults.Margin = new System.Windows.Forms.Padding(4);
             this.dgvResults.Name = "dgvResults";
             this.dgvResults.RowHeadersWidth = 51;
             this.dgvResults.Size = new System.Drawing.Size(1381, 386);
@@ -493,7 +494,7 @@ namespace PerfumeAllocationSystem
             // 
             this.btnRunAllocation.Enabled = false;
             this.btnRunAllocation.Location = new System.Drawing.Point(11, 15);
-            this.btnRunAllocation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRunAllocation.Margin = new System.Windows.Forms.Padding(4);
             this.btnRunAllocation.Name = "btnRunAllocation";
             this.btnRunAllocation.Size = new System.Drawing.Size(147, 28);
             this.btnRunAllocation.TabIndex = 0;
@@ -505,7 +506,7 @@ namespace PerfumeAllocationSystem
             // 
             this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnReset.Location = new System.Drawing.Point(1293, 769);
-            this.btnReset.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnReset.Margin = new System.Windows.Forms.Padding(4);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(136, 28);
             this.btnReset.TabIndex = 1;
@@ -520,7 +521,7 @@ namespace PerfumeAllocationSystem
             this.ClientSize = new System.Drawing.Size(1445, 814);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.tabControl1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Perfume Allocation System";
             this.tabControl1.ResumeLayout(false);

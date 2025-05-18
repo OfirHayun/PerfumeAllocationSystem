@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Linq;
+using System.Text;
 using PerfumeAllocationSystem.Core;
 using PerfumeAllocationSystem.Models;
 using PerfumeAllocationSystem.Services;
@@ -45,6 +46,68 @@ namespace PerfumeAllocationSystem
             // Add validators to prevent entering zero or invalid values
             txtMinLongevity.KeyPress += NumericTextBox_KeyPress;
             txtMinProjection.KeyPress += NumericTextBox_KeyPress;
+
+            // Add double-click event to view store requirements
+            dgvStores.CellDoubleClick += dgvStores_CellDoubleClick;
+        }
+
+        // Add this method to view store requirements
+        private void ShowStoreRequirements(StoreRequirement store)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Requirements for {store.StoreName}:");
+            sb.AppendLine($"Budget: {store.Budget:C}");
+            sb.AppendLine($"Quantity Needed: {store.QuantityNeeded}");
+            sb.AppendLine($"Maximum Price per Perfume: {store.MaxPrice:C}");
+            sb.AppendLine();
+
+            sb.AppendLine("Perfume Preferences:");
+            sb.AppendLine($"Gender: {(string.IsNullOrEmpty(store.Gender) ? "Any" : store.Gender)}");
+            sb.AppendLine($"Preferred Accord: {(string.IsNullOrEmpty(store.PreferredAccord) ? "Any" : store.PreferredAccord)}");
+
+            if (!string.IsNullOrEmpty(store.PreferredTopNotes))
+                sb.AppendLine($"Preferred Top Notes: {store.PreferredTopNotes}");
+
+            if (!string.IsNullOrEmpty(store.PreferredMiddleNotes))
+                sb.AppendLine($"Preferred Middle Notes: {store.PreferredMiddleNotes}");
+
+            if (!string.IsNullOrEmpty(store.PreferredBaseNotes))
+                sb.AppendLine($"Preferred Base Notes: {store.PreferredBaseNotes}");
+
+            sb.AppendLine($"Minimum Longevity: {store.MinLongevity}/10");
+            sb.AppendLine($"Minimum Projection: {store.MinProjection}/10");
+
+            MessageBox.Show(sb.ToString(), $"{store.StoreName} Requirements",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        // Add this method to create a button to view requirements
+        private void AddViewRequirementsButton(Control container, StoreRequirement store, Point location, Size size)
+        {
+            Button btnViewRequirements = new Button
+            {
+                Text = "View Requirements",
+                Location = location,
+                Size = size,
+                BackColor = Color.FromArgb(80, 80, 120),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+
+            btnViewRequirements.MouseEnter += (s, e) => btnViewRequirements.BackColor = Color.FromArgb(100, 100, 140);
+            btnViewRequirements.MouseLeave += (s, e) => btnViewRequirements.BackColor = Color.FromArgb(80, 80, 120);
+            btnViewRequirements.Click += (s, e) => ShowStoreRequirements(store);
+
+            container.Controls.Add(btnViewRequirements);
+        }
+
+        private void dgvStores_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < _storeRequirements.Count)
+            {
+                ShowStoreRequirements(_storeRequirements[e.RowIndex]);
+            }
         }
 
         private void InitializeFormStyle()
@@ -496,7 +559,7 @@ namespace PerfumeAllocationSystem
 
         private decimal GetMaximumPerfumePrice()
         {
-            if (_perfumes.Count == 0) return 400m; // Default fallback
+            if (_perfumes.Count == 0) return 500m; // Default fallback
             return _perfumes.Max(p => p.AveragePrice);
         }
 
@@ -622,12 +685,12 @@ namespace PerfumeAllocationSystem
             txtQuantity.Text = _random.Next(3, 15).ToString();
 
             // Higher chance of selecting "Any" gender for more flexibility
-            string[] genders = { "Any", "Any", "Any", "Male", "Female", "Unisex" };
+            string[] genders = { "Any","Any", "Male", "Female", "Unisex" };
             cboGender.SelectedItem = genders[_random.Next(genders.Length)];
 
             // Higher chance of selecting "Any" accord for more flexibility
             string[] accords = {
-                "Any", "Any", "Any", "Any", // Added more "Any" options to increase probability
+                "Any", "Any", "Any", // Added more "Any" options to increase probability
                 "Aromatic", "Woody", "Fresh", "Sweet", "Floral", "Citrus",
                 "Oriental", "Fruity", "Spicy"
             };
@@ -720,19 +783,21 @@ namespace PerfumeAllocationSystem
 
         private void GenerateImprovedQualitySettings()
         {
-            // Lower minimum requirements for better match probability
-            txtMinLongevity.Text = _random.Next(1, 5).ToString(); // 1-4 instead of 1-10
-            txtMinProjection.Text = _random.Next(1, 5).ToString(); // 1-4 instead of 1-10
+            // Lower minimum requirements for better match probability but with some variation
+            txtMinLongevity.Text = _random.Next(1, 8).ToString();
+            txtMinProjection.Text = _random.Next(1, 8).ToString();
 
-            // Ensure max price is reasonable based on available perfumes
+            // Get price ranges
             decimal minPrice = GetMinimumPerfumePrice();
             decimal avgPrice = GetAveragePerfumePrice();
             decimal maxPrice = GetMaximumPerfumePrice();
 
-            // Set price slightly above average to ensure good matching
-            // but avoid extremely high prices that might be unrealistic
-            decimal targetPrice = Math.Min(avgPrice * 1.5m, maxPrice);
-            targetPrice = Math.Max(targetPrice, minPrice * 1.2m); // Ensure it's at least 20% above min price
+            // Add randomization factor (between 60% and 95% of max price)
+            decimal randomFactor = (decimal)(_random.NextDouble() * 0.35 + 0.60);
+            decimal targetPrice = maxPrice * randomFactor;
+
+            // Ensure it's at least 20% above min price
+            targetPrice = Math.Max(targetPrice, minPrice * 1.2m);
 
             // Round to nearest $10
             targetPrice = Math.Round(targetPrice / 10) * 10;
@@ -894,6 +959,10 @@ namespace PerfumeAllocationSystem
             GroupBox groupBox = CreateStoreGroupBox(store, yPos);
             AddStoreMetricsLabels(store, groupBox);
             AddPerfumesList(store, groupBox);
+
+            // Add view requirements button
+            AddViewRequirementsButton(groupBox, store, new Point(groupBox.Width - 150, 20), new Size(130, 25));
+
             pnlAllocationDetails.Controls.Add(groupBox);
             yPos += groupBox.Height + 10;
         }
@@ -1202,7 +1271,7 @@ namespace PerfumeAllocationSystem
                 ListBox lstPerfumes = new ListBox
                 {
                     Location = new Point(5, 115),
-                    Size = new Size(storePanel.Width - 15, 235), // Shorter to make room for button
+                    Size = new Size(storePanel.Width - 15, 205), // Shorter to make room for buttons
                     Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
                     BorderStyle = BorderStyle.None,
                     Font = new Font("Segoe UI", 8.5F),
@@ -1217,19 +1286,23 @@ namespace PerfumeAllocationSystem
 
                 storePanel.Controls.Add(lstPerfumes);
 
+                // Add View Requirements button
+                AddViewRequirementsButton(storePanel, store, new Point(5, 325), new Size(storePanel.Width - 15, 30));
+
                 // Add Expand button for stores with satisfaction under 70%
                 if (store.SatisfactionPercentage < 70.0)
                 {
                     Button btnExpand = new Button
                     {
                         Text = "Explain Low Satisfaction",
-                        Location = new Point(5, 355), // Position below the listbox
+                        Location = new Point(5, 360), // Position below the view requirements button
                         Size = new Size(storePanel.Width - 15, 30),
                         BackColor = Color.FromArgb(180, 180, 180),
                         ForeColor = Color.Black,
                         FlatStyle = FlatStyle.Flat,
                         Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                        Tag = GetSatisfactionExplanation(store) // Store explanation in tag
+                        Tag = GetSatisfactionExplanation(store), // Store explanation in tag
+                        Cursor = Cursors.Hand
                     };
 
                     // Add click event handler
@@ -1542,7 +1615,6 @@ namespace PerfumeAllocationSystem
             btnAddStore.Enabled = false;
             btnGenerateRandomStore.Enabled = false;
             btnRunAllocation.Enabled = false;
-            // Removed btnSaveResults.Enabled = false;
         }
 
         private void RemoveDynamicTabs()
@@ -1559,5 +1631,7 @@ namespace PerfumeAllocationSystem
             // This is an empty handler to fix the designer error
             // No action needed as we don't require cell click functionality
         }
+
+ 
     }
 }

@@ -46,7 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparisonReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Core\AllocationEngine.cs" />
+    <Compile Include="Core\SimpleAllocationSystem.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

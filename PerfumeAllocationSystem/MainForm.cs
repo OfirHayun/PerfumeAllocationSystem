@@ -16,6 +16,9 @@ namespace PerfumeAllocationSystem
         private List<Perfume> _perfumes = new List<Perfume>();
         private List<StoreRequirement> _storeRequirements = new List<StoreRequirement>();
         private AllocationEngine _allocationEngine;
+        private SimpleAllocationEngine _simpleAllocationEngine; // Add this field
+        private List<StoreRequirement> _lastOptimizedResults; // To store the last optimized results
+        private Button _compareAlgorithmsButton; // Store the button reference
         private DataService _dataService = new DataService();
         private Random _random = new Random();
         private Timer timerHideMsg;
@@ -49,6 +52,82 @@ namespace PerfumeAllocationSystem
 
             // Add double-click event to view store requirements
             dgvStores.CellDoubleClick += dgvStores_CellDoubleClick;
+
+            // Create the compare algorithms button (but don't add it yet)
+            CreateCompareAlgorithmsButton();
+        }
+
+        private void CreateCompareAlgorithmsButton()
+        {
+            // We'll add this button to the summary panel after allocation
+            // The button will be created but not added to the UI yet
+            Button btnCompareAlgorithms = new Button
+            {
+                Text = "Compare Algorithms",
+                Width = 200,
+                Height = 35,
+                BackColor = Color.FromArgb(60, 60, 100),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Enabled = false,
+                Name = "btnCompareAlgorithms"
+            };
+
+            btnCompareAlgorithms.Click += btnCompareAlgorithms_Click;
+
+            // Apply the same style as other buttons
+            ApplyButtonStyle(btnCompareAlgorithms);
+
+            // Store the button in a class-level field to reference it later
+            _compareAlgorithmsButton = btnCompareAlgorithms;
+        }
+
+        private void btnCompareAlgorithms_Click(object sender, EventArgs e)
+        {
+            if (_lastOptimizedResults == null || _lastOptimizedResults.Count == 0)
+            {
+                MessageBox.Show("Please run the allocation process first", "No Data",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Cursor = Cursors.WaitCursor;
+
+            try
+            {
+                // Create a simple allocation engine if it doesn't exist
+                if (_simpleAllocationEngine == null && _perfumes.Count > 0)
+                {
+                    _simpleAllocationEngine = new SimpleAllocationEngine(_perfumes);
+                }
+
+                // Get a fresh copy of the store requirements (to ensure we start fresh)
+                List<StoreRequirement> freshStoreRequirements = _storeRequirements.Select(s => s.Clone()).ToList();
+
+                // Run the simple allocation
+                List<StoreRequirement> simpleResults = _simpleAllocationEngine.AllocatePerfumes(freshStoreRequirements);
+                decimal simpleProfit = _simpleAllocationEngine.GetTotalProfit();
+
+                // Get the profit from the optimized algorithm
+                decimal optimizedProfit = _allocationEngine.GetTotalProfit();
+
+                // Show the comparison report
+                ComparisonReportForm reportForm = new ComparisonReportForm(
+                    _lastOptimizedResults, optimizedProfit,
+                    simpleResults, simpleProfit);
+
+                reportForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating comparison: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
 
         // Add this method to view store requirements
@@ -685,7 +764,7 @@ namespace PerfumeAllocationSystem
             txtQuantity.Text = _random.Next(3, 15).ToString();
 
             // Higher chance of selecting "Any" gender for more flexibility
-            string[] genders = { "Any","Any", "Male", "Female", "Unisex" };
+            string[] genders = { "Any", "Any", "Male", "Female", "Unisex" };
             cboGender.SelectedItem = genders[_random.Next(genders.Length)];
 
             // Higher chance of selecting "Any" accord for more flexibility
@@ -900,6 +979,15 @@ namespace PerfumeAllocationSystem
 
             List<StoreRequirement> results = _allocationEngine.AllocatePerfumes(_storeRequirements);
 
+            // Store the results for comparison
+            _lastOptimizedResults = results;
+
+            // Enable the compare button now that we have results
+            if (_compareAlgorithmsButton != null)
+            {
+                _compareAlgorithmsButton.Enabled = true;
+            }
+
             // Check for stores with 0% satisfaction after allocation
             var zeroSatisfactionStores = results.Where(s => s.SatisfactionPercentage == 0).ToList();
             if (zeroSatisfactionStores.Any())
@@ -917,6 +1005,7 @@ namespace PerfumeAllocationSystem
             CreateResultsTab(results, profit);
             DisplayTotalProfitSummary(profit);
         }
+
         private int CountMatchingPerfumes(StoreRequirement store)
         {
             return _perfumes.Count(p =>
@@ -1106,6 +1195,14 @@ namespace PerfumeAllocationSystem
                 Location = new Point(500, 30)
             };
 
+            // Add the compare algorithms button to the summary panel
+            if (_compareAlgorithmsButton != null)
+            {
+                _compareAlgorithmsButton.Location = new Point(800, 15); // Position in the yellow area
+                _compareAlgorithmsButton.Enabled = true;
+                profitPanel.Controls.Add(_compareAlgorithmsButton);
+            }
+
             profitPanel.Controls.Add(lblProfitTitle);
             profitPanel.Controls.Add(lblProfitValue);
             profitPanel.Controls.Add(lblStoreCount);
@@ -1167,6 +1264,24 @@ namespace PerfumeAllocationSystem
 
             // Add the table to the header
             headerPanel.Controls.Add(statsTable);
+
+            // Add the compare algorithms button to this tab's header panel
+            Button tabCompareButton = new Button
+            {
+                Text = "Compare Algorithms",
+                Width = 200,
+                Height = 35,
+                BackColor = Color.FromArgb(60, 60, 100),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Name = "tabCompareButton",
+                Location = new Point(800, 15) // Position on the right side
+            };
+
+            tabCompareButton.Click += btnCompareAlgorithms_Click;
+            ApplyButtonStyle(tabCompareButton);
+            headerPanel.Controls.Add(tabCompareButton);
 
             // Main panel with auto scroll
             Panel mainPanel = new Panel
@@ -1511,6 +1626,13 @@ namespace PerfumeAllocationSystem
             // Remove dynamic tabs
             RemoveDynamicTabs();
 
+            // Reset the last optimized results
+            _lastOptimizedResults = null;
+
+            // Clear all allocation engines
+            _allocationEngine = null;
+            _simpleAllocationEngine = null;
+
             // Ensure we have a new DataService
             _dataService = new DataService();
 
@@ -1615,6 +1737,30 @@ namespace PerfumeAllocationSystem
             btnAddStore.Enabled = false;
             btnGenerateRandomStore.Enabled = false;
             btnRunAllocation.Enabled = false;
+
+            // Disable the main compare algorithms button if it exists
+            if (_compareAlgorithmsButton != null)
+            {
+                _compareAlgorithmsButton.Enabled = false;
+            }
+
+            // Disable any compare buttons on result panels
+            foreach (TabPage tab in tabControl1.TabPages)
+            {
+                foreach (Control ctrl in tab.Controls)
+                {
+                    if (ctrl is Panel)
+                    {
+                        foreach (Control panelCtrl in ctrl.Controls)
+                        {
+                            if (panelCtrl is Button && (panelCtrl.Name == "btnCompareAlgorithms" || panelCtrl.Name == "tabCompareButton"))
+                            {
+                                panelCtrl.Enabled = false;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void RemoveDynamicTabs()
@@ -1631,7 +1777,5 @@ namespace PerfumeAllocationSystem
             // This is an empty handler to fix the designer error
             // No action needed as we don't require cell click functionality
         }
-
- 
     }
 }

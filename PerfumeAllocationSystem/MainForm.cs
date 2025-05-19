@@ -59,30 +59,38 @@ namespace PerfumeAllocationSystem
 
         private void CreateCompareAlgorithmsButton()
         {
-            // We'll add this button to the summary panel after allocation
-            // The button will be created but not added to the UI yet
-            Button btnCompareAlgorithms = new Button
+            // Create button with color scheme matching existing application buttons
+            _compareAlgorithmsButton = new Button
             {
                 Text = "Compare Algorithms",
                 Width = 200,
                 Height = 35,
-                BackColor = Color.FromArgb(60, 60, 100),
+                // Match the same purple color used in other buttons
+                BackColor = Color.FromArgb(60, 60, 100),  // Dark purple to match your app
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 Enabled = false,
-                Name = "btnCompareAlgorithms"
+                Name = "btnCompareAlgorithms",
+                Cursor = Cursors.Hand
             };
 
-            btnCompareAlgorithms.Click += btnCompareAlgorithms_Click;
+            // Remove the default button border for a cleaner look
+            _compareAlgorithmsButton.FlatAppearance.BorderSize = 0;
 
-            // Apply the same style as other buttons
-            ApplyButtonStyle(btnCompareAlgorithms);
+            // Add hover effect to match other buttons
+            _compareAlgorithmsButton.MouseEnter += (s, e) => {
+                if (_compareAlgorithmsButton.Enabled)
+                    _compareAlgorithmsButton.BackColor = Color.FromArgb(80, 80, 120); // Match your hover color
+            };
 
-            // Store the button in a class-level field to reference it later
-            _compareAlgorithmsButton = btnCompareAlgorithms;
+            _compareAlgorithmsButton.MouseLeave += (s, e) => {
+                if (_compareAlgorithmsButton.Enabled)
+                    _compareAlgorithmsButton.BackColor = Color.FromArgb(60, 60, 100); // Back to original purple
+            };
+
+            _compareAlgorithmsButton.Click += btnCompareAlgorithms_Click;
         }
-
         private void btnCompareAlgorithms_Click(object sender, EventArgs e)
         {
             if (_lastOptimizedResults == null || _lastOptimizedResults.Count == 0)

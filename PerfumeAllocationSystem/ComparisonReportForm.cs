@@ -13,6 +13,7 @@ namespace PerfumeAllocationSystem
         private decimal _optimizedProfit;
         private decimal _simpleProfit;
 
+        // Initializes the comparison report with optimized and simple allocation results
         public ComparisonReportForm(List<StoreRequirement> optimizedResults, decimal optimizedProfit,
                                    List<StoreRequirement> simpleResults, decimal simpleProfit)
         {
@@ -26,21 +27,19 @@ namespace PerfumeAllocationSystem
             PopulateReport();
         }
 
+        // Initializes form components
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            // 
-            // ComparisonReportForm
-            // 
             this.ClientSize = new System.Drawing.Size(1000, 700);
             this.Name = "ComparisonReportForm";
             this.Text = "Perfume Allocation Algorithm Comparison";
             this.ResumeLayout(false);
         }
 
+        // Sets up the form UI with all panels and components
         private void SetupUI()
         {
-            // Set form properties
             this.Text = "Perfume Allocation Algorithm Comparison";
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Font = new Font("Segoe UI", 10F);
@@ -49,7 +48,6 @@ namespace PerfumeAllocationSystem
             this.MaximizeBox = false;
             this.MinimizeBox = false;
 
-            // Main table layout
             TableLayoutPanel mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -58,21 +56,18 @@ namespace PerfumeAllocationSystem
                 BackColor = Color.White
             };
 
-            // Row styles
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 100)); // Header
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));  // Content
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));  // Footer
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
 
             this.Controls.Add(mainLayout);
 
-            // Header panel
             Panel headerPanel = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(60, 60, 100)
             };
 
-            // Add titles to header
             Label lblTitle = new Label
             {
                 Text = "Algorithm Effectiveness Comparison",
@@ -98,7 +93,6 @@ namespace PerfumeAllocationSystem
             };
             headerPanel.Controls.Add(lblSubtitle);
 
-            // Add the legend
             Panel legendPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -112,7 +106,6 @@ namespace PerfumeAllocationSystem
             headerPanel.Controls.Add(legendPanel);
             mainLayout.Controls.Add(headerPanel, 0, 0);
 
-            // Content panel - split into two sections
             TableLayoutPanel contentLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -121,13 +114,11 @@ namespace PerfumeAllocationSystem
                 BackColor = Color.White
             };
 
-            // Column styles
-            contentLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); // Stats table
-            contentLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); // Chart
+            contentLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            contentLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
 
             mainLayout.Controls.Add(contentLayout, 0, 1);
 
-            // Stats table panel
             Panel statsPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -135,7 +126,6 @@ namespace PerfumeAllocationSystem
                 BackColor = Color.White
             };
 
-            // Create table for metrics
             TableLayoutPanel metricsTable = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -145,18 +135,15 @@ namespace PerfumeAllocationSystem
                 BackColor = Color.White
             };
 
-            // Set column styles
             metricsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             metricsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
             metricsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-            // Set row styles - making them equal
             for (int i = 0; i < 6; i++)
             {
                 metricsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / 6));
             }
 
-            // Add header row
             Label lblMetricHeader = CreateHeaderLabel("Performance Metrics");
             Label lblOptimizedHeader = CreateHeaderLabel("My Algorithm");
             Label lblSimpleHeader = CreateHeaderLabel("Simple Algorithm");
@@ -168,7 +155,6 @@ namespace PerfumeAllocationSystem
             statsPanel.Controls.Add(metricsTable);
             contentLayout.Controls.Add(statsPanel, 0, 0);
 
-            // Chart panel
             Panel chartPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -186,7 +172,6 @@ namespace PerfumeAllocationSystem
 
             contentLayout.Controls.Add(chartPanel, 1, 0);
 
-            // Footer with close button
             Panel footerPanel = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -209,10 +194,10 @@ namespace PerfumeAllocationSystem
 
             mainLayout.Controls.Add(footerPanel, 0, 2);
 
-            // Store the metrics table for later population
             Tag = metricsTable;
         }
 
+        // Creates a legend item with a color box and label
         private void CreateLegendItem(Panel panel, string text, Color color, int xPosition)
         {
             Panel colorBox = new Panel
@@ -235,6 +220,7 @@ namespace PerfumeAllocationSystem
             panel.Controls.Add(label);
         }
 
+        // Creates a header label with consistent styling
         private Label CreateHeaderLabel(string text)
         {
             return new Label
@@ -248,12 +234,12 @@ namespace PerfumeAllocationSystem
             };
         }
 
+        // Populates the report with metrics and comparison data
         private void PopulateReport()
         {
             TableLayoutPanel metricsTable = (TableLayoutPanel)Tag;
 
-            // Calculate metrics
-            decimal optimizedRevenue = _optimizedProfit / 0.3m; // 30% profit margin
+            decimal optimizedRevenue = _optimizedProfit / 0.3m;
             decimal simpleRevenue = _simpleProfit / 0.3m;
 
             double profitImprovement = CalculatePercentImprovement((double)_optimizedProfit, (double)_simpleProfit);
@@ -274,7 +260,6 @@ namespace PerfumeAllocationSystem
             int optimizedHighSatisfaction = CountStoresAboveThreshold(_optimizedResults, 70);
             int simpleHighSatisfaction = CountStoresAboveThreshold(_simpleResults, 70);
 
-            // Add the key metrics rows
             AddMetricRow(metricsTable, 1, "Total Profit",
                           $"{_optimizedProfit:C}",
                           $"{_simpleProfit:C}",
@@ -301,9 +286,9 @@ namespace PerfumeAllocationSystem
                           CalculatePercentImprovement(optimizedHighSatisfaction, simpleHighSatisfaction));
         }
 
+        // Adds a metric row to the comparison table with improvement indicators
         private void AddMetricRow(TableLayoutPanel table, int row, string metricName, string optimizedValue, string simpleValue, double improvement)
         {
-            // Create metric label
             Label metricLabel = new Label
             {
                 Text = metricName,
@@ -313,7 +298,6 @@ namespace PerfumeAllocationSystem
                 Font = new Font("Segoe UI", 10F)
             };
 
-            // Create optimized value label with improvement 
             string improvementStr = improvement > 0 ? $" (+{improvement:F1}%)" : "";
             Label optimizedLabel = new Label
             {
@@ -324,7 +308,6 @@ namespace PerfumeAllocationSystem
                 ForeColor = improvement > 0 ? Color.FromArgb(46, 139, 87) : Color.Black
             };
 
-            // Create simple value label
             Label simpleLabel = new Label
             {
                 Text = simpleValue,
@@ -333,7 +316,6 @@ namespace PerfumeAllocationSystem
                 Font = new Font("Segoe UI", 9F)
             };
 
-            // Add improvement indicator if positive
             if (improvement > 0)
             {
                 Label improvementLabel = new Label
@@ -352,25 +334,22 @@ namespace PerfumeAllocationSystem
             table.Controls.Add(simpleLabel, 2, row);
         }
 
+        // Draws the comparison chart with metrics visualization
         private void DrawComparisonChart(Graphics g, Panel panel)
         {
-            // Set up dimensions
             int margin = 40;
             int barWidth = 30;
             int spacing = 15;
             int chartHeight = panel.Height - 2 * margin;
             int barBottom = panel.Height - margin;
 
-            // Draw axes
             Pen axisPen = new Pen(Color.Black, 2);
-            g.DrawLine(axisPen, margin, barBottom, panel.Width - margin, barBottom); // X-axis
-            g.DrawLine(axisPen, margin, margin, margin, barBottom); // Y-axis
+            g.DrawLine(axisPen, margin, barBottom, panel.Width - margin, barBottom);
+            g.DrawLine(axisPen, margin, margin, margin, barBottom);
 
-            // Add axis labels
             g.DrawString("Metrics", new Font("Arial", 10, FontStyle.Bold), Brushes.Black,
                          panel.Width / 2 - 25, panel.Height - 20);
 
-            // Calculate metrics
             double optimizedProfit = (double)_optimizedProfit;
             double simpleProfit = (double)_simpleProfit;
 
@@ -380,7 +359,6 @@ namespace PerfumeAllocationSystem
             double optimizedSatisfaction = GetAverageSatisfaction(_optimizedResults);
             double simpleSatisfaction = GetAverageSatisfaction(_simpleResults);
 
-            // Normalize values (to make all fit on same chart)
             double maxProfit = Math.Max(optimizedProfit, simpleProfit);
             double normOptProfit = optimizedProfit / maxProfit;
             double normSimProfit = simpleProfit / maxProfit;
@@ -389,16 +367,13 @@ namespace PerfumeAllocationSystem
             double normOptCount = optimizedPerfumeCount / maxCount;
             double normSimCount = simplePerfumeCount / maxCount;
 
-            // Satisfaction is already 0-100
             double normOptSat = optimizedSatisfaction / 100;
             double normSimSat = simpleSatisfaction / 100;
 
-            // Calculate bar positions
             int profitX = margin + spacing;
             int countX = profitX + 2 * barWidth + 2 * spacing;
             int satX = countX + 2 * barWidth + 2 * spacing;
 
-            // Draw bars and labels
             DrawBarPair(g, "Profit", profitX, barBottom, barWidth, chartHeight,
                       normOptProfit, normSimProfit,
                       $"${_optimizedProfit:N0}", $"${_simpleProfit:N0}");
@@ -412,35 +387,32 @@ namespace PerfumeAllocationSystem
                       $"{optimizedSatisfaction:F1}%", $"{simpleSatisfaction:F1}%");
         }
 
+        // Draws a pair of bars for a metric in the chart
         private void DrawBarPair(Graphics g, string label, int x, int baseY, int width, int maxHeight,
                                double optValue, double simValue, string optText, string simText)
         {
-            // Calculate bar heights (minimum 10 pixels for visibility)
-            int optHeight = Math.Max(10, (int)(optValue * maxHeight * 0.9)); // 0.9 to leave room for labels
+            int optHeight = Math.Max(10, (int)(optValue * maxHeight * 0.9));
             int simHeight = Math.Max(10, (int)(simValue * maxHeight * 0.9));
 
-            // Draw the optimized algorithm bar
             Rectangle optBar = new Rectangle(x, baseY - optHeight, width, optHeight);
             g.FillRectangle(new SolidBrush(Color.FromArgb(46, 139, 87)), optBar);
             g.DrawRectangle(new Pen(Color.Black), optBar);
 
-            // Draw the simple algorithm bar
             Rectangle simBar = new Rectangle(x + width + 5, baseY - simHeight, width, simHeight);
             g.FillRectangle(new SolidBrush(Color.FromArgb(80, 80, 120)), simBar);
             g.DrawRectangle(new Pen(Color.Black), simBar);
 
-            // Add value labels above bars - make them smaller
             g.DrawString(optText, new Font("Arial", 8, FontStyle.Bold), Brushes.Black,
                         x, baseY - optHeight - 15);
 
             g.DrawString(simText, new Font("Arial", 8), Brushes.Black,
                         x + width + 5, baseY - simHeight - 15);
 
-            // Add x-axis label
             g.DrawString(label, new Font("Arial", 9, FontStyle.Bold), Brushes.Black,
                         x + width - 10, baseY + 5);
         }
 
+        // Counts total perfumes allocated across all stores
         private int GetTotalPerfumeCount(List<StoreRequirement> results)
         {
             int total = 0;
@@ -451,6 +423,7 @@ namespace PerfumeAllocationSystem
             return total;
         }
 
+        // Calculates average satisfaction across all stores
         private double GetAverageSatisfaction(List<StoreRequirement> results)
         {
             if (results.Count == 0) return 0;
@@ -463,6 +436,7 @@ namespace PerfumeAllocationSystem
             return total / results.Count;
         }
 
+        // Counts stores that received all requested perfumes
         private int CountFullyAllocatedStores(List<StoreRequirement> results)
         {
             int count = 0;
@@ -476,6 +450,7 @@ namespace PerfumeAllocationSystem
             return count;
         }
 
+        // Counts stores with satisfaction above a given threshold
         private int CountStoresAboveThreshold(List<StoreRequirement> results, double threshold)
         {
             int count = 0;
@@ -489,9 +464,10 @@ namespace PerfumeAllocationSystem
             return count;
         }
 
+        // Calculates percentage improvement between optimized and simple values
         private double CalculatePercentImprovement(double optimized, double simple)
         {
-            if (simple == 0) return 100; // If simple is 0, show 100% improvement
+            if (simple == 0) return 100;
             return ((optimized - simple) / simple) * 100;
         }
     }

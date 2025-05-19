@@ -9,9 +9,8 @@ namespace PerfumeAllocationSystem.Models
         public decimal Budget { get; set; }
         public int QuantityNeeded { get; set; }
 
-        // Perfume attributes requirements
-        public string Gender { get; set; }  // Male, Female, Unisex, Any
-        public string PreferredAccord { get; set; } // Main accord type (e.g., Woody, Floral, etc.)
+        public string Gender { get; set; }
+        public string PreferredAccord { get; set; }
         public string PreferredTopNotes { get; set; }
         public string PreferredMiddleNotes { get; set; }
         public string PreferredBaseNotes { get; set; }
@@ -19,16 +18,14 @@ namespace PerfumeAllocationSystem.Models
         public int MinProjection { get; set; }
         public decimal MaxPrice { get; set; }
 
-        // Track allocated perfumes
         public List<Perfume> AllocatedPerfumes { get; set; } = new List<Perfume>();
 
-        // Track allocation metrics
         public double SatisfactionPercentage { get; set; }
         public decimal TotalSpent { get; set; }
         public decimal RemainingBudget => Budget - TotalSpent;
         public int RemainingQuantity => QuantityNeeded - AllocatedPerfumes.Count;
 
-        // Clone this requirement (useful for backtracking algorithm)
+        // Creates a clone of this store requirement
         public StoreRequirement Clone()
         {
             StoreRequirement clone = CreateClonedStore();
@@ -36,6 +33,7 @@ namespace PerfumeAllocationSystem.Models
             return clone;
         }
 
+        // Creates a new store with copied properties
         private StoreRequirement CreateClonedStore()
         {
             return new StoreRequirement
@@ -56,6 +54,7 @@ namespace PerfumeAllocationSystem.Models
             };
         }
 
+        // Clones the allocated perfumes to the new store
         private void CloneAllocatedPerfumes(StoreRequirement clone)
         {
             foreach (var perfume in this.AllocatedPerfumes)

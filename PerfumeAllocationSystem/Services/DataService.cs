@@ -10,7 +10,7 @@ namespace PerfumeAllocationSystem.Services
 {
     public class DataService
     {
-        // Load perfumes from CSV file
+        // Loads perfume data from a CSV file
         public List<Perfume> LoadPerfumesFromCsv(string filePath)
         {
             List<Perfume> perfumes = new List<Perfume>();
@@ -32,12 +32,14 @@ namespace PerfumeAllocationSystem.Services
             return perfumes;
         }
 
+        // Shows an error when file is not found
         private void ShowFileNotFoundError(string filePath)
         {
             MessageBox.Show($"File not found: {filePath}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        // Processes CSV file and creates perfume objects
         private void ProcessCsvFile(string filePath, List<Perfume> perfumes)
         {
             string[] lines = File.ReadAllLines(filePath);
@@ -52,6 +54,7 @@ namespace PerfumeAllocationSystem.Services
             }
         }
 
+        // Creates a perfume from a CSV line
         private void AddPerfumeFromCsvLine(string line, List<Perfume> perfumes)
         {
             string[] parts = line.Split(';');
@@ -62,6 +65,7 @@ namespace PerfumeAllocationSystem.Services
             }
         }
 
+        // Creates a perfume object from CSV parts
         private Perfume CreatePerfumeFromParts(string[] parts)
         {
             return new Perfume
@@ -80,13 +84,14 @@ namespace PerfumeAllocationSystem.Services
             };
         }
 
+        // Shows an error when loading fails
         private void ShowLoadError(Exception ex)
         {
             MessageBox.Show($"Error loading perfumes: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        // Save allocation results to CSV
+        // Saves allocation results to a CSV file
         public bool SaveAllocationResultsToCsv(List<StoreRequirement> results, string filePath)
         {
             try
@@ -101,6 +106,7 @@ namespace PerfumeAllocationSystem.Services
             }
         }
 
+        // Writes results to a CSV file
         private void WriteResultsToCsv(List<StoreRequirement> results, string filePath)
         {
             using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
@@ -110,12 +116,14 @@ namespace PerfumeAllocationSystem.Services
             }
         }
 
+        // Writes CSV header
         private void WriteResultsHeader(StreamWriter writer)
         {
             writer.WriteLine("Store,Budget,QuantityNeeded,SatisfactionPercentage," +
                             "TotalSpent,RemainingBudget,AllocatedPerfumes");
         }
 
+        // Writes results data rows
         private void WriteResultsData(StreamWriter writer, List<StoreRequirement> results)
         {
             foreach (var store in results)
@@ -127,11 +135,13 @@ namespace PerfumeAllocationSystem.Services
             }
         }
 
+        // Formats allocated perfumes for CSV
         private string FormatAllocatedPerfumes(StoreRequirement store)
         {
             return string.Join("; ", store.AllocatedPerfumes.Select(p => $"{p.Brand} {p.Name}"));
         }
 
+        // Shows an error when saving fails
         private void ShowSaveError(Exception ex)
         {
             MessageBox.Show($"Error saving results: {ex.Message}", "Error",

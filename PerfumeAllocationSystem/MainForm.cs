@@ -16,17 +16,17 @@ namespace PerfumeAllocationSystem
         private List<Perfume> _perfumes = new List<Perfume>();
         private List<StoreRequirement> _storeRequirements = new List<StoreRequirement>();
         private AllocationEngine _allocationEngine;
-        private SimpleAllocationEngine _simpleAllocationEngine; // Add this field
-        private List<StoreRequirement> _lastOptimizedResults; // To store the last optimized results
-        private Button _compareAlgorithmsButton; // Store the button reference
+        private SimpleAllocationEngine _simpleAllocationEngine;
+        private List<StoreRequirement> _lastOptimizedResults;
+        private Button _compareAlgorithmsButton;
         private DataService _dataService = new DataService();
         private Random _random = new Random();
         private Timer timerHideMsg;
         private Label lblRandomStoreMsg;
 
-        // Path to the embedded CSV file
         private const string DEFAULT_CSV_PATH = "fragrances-database.csv";
 
+        // Initializes the form and loads default data
         public MainForm()
         {
             InitializeComponent();
@@ -34,6 +34,7 @@ namespace PerfumeAllocationSystem
             LoadDefaultCsvData();
         }
 
+        // Sets up all UI components and their initial configurations
         private void InitializeUI()
         {
             InitializeFormStyle();
@@ -42,31 +43,26 @@ namespace PerfumeAllocationSystem
             SetupDataGridViews();
             InitializeComboBoxes();
 
-            // Set default values for longevity and projection
             txtMinLongevity.Text = "1";
             txtMinProjection.Text = "1";
 
-            // Add validators to prevent entering zero or invalid values
             txtMinLongevity.KeyPress += NumericTextBox_KeyPress;
             txtMinProjection.KeyPress += NumericTextBox_KeyPress;
 
-            // Add double-click event to view store requirements
             dgvStores.CellDoubleClick += dgvStores_CellDoubleClick;
 
-            // Create the compare algorithms button (but don't add it yet)
             CreateCompareAlgorithmsButton();
         }
 
+        // Creates the compare algorithms button with styling
         private void CreateCompareAlgorithmsButton()
         {
-            // Create button with color scheme matching existing application buttons
             _compareAlgorithmsButton = new Button
             {
                 Text = "Compare Algorithms",
                 Width = 200,
                 Height = 35,
-                // Match the same purple color used in other buttons
-                BackColor = Color.FromArgb(60, 60, 100),  // Dark purple to match your app
+                BackColor = Color.FromArgb(60, 60, 100),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
@@ -75,22 +71,22 @@ namespace PerfumeAllocationSystem
                 Cursor = Cursors.Hand
             };
 
-            // Remove the default button border for a cleaner look
             _compareAlgorithmsButton.FlatAppearance.BorderSize = 0;
 
-            // Add hover effect to match other buttons
             _compareAlgorithmsButton.MouseEnter += (s, e) => {
                 if (_compareAlgorithmsButton.Enabled)
-                    _compareAlgorithmsButton.BackColor = Color.FromArgb(80, 80, 120); // Match your hover color
+                    _compareAlgorithmsButton.BackColor = Color.FromArgb(80, 80, 120);
             };
 
             _compareAlgorithmsButton.MouseLeave += (s, e) => {
                 if (_compareAlgorithmsButton.Enabled)
-                    _compareAlgorithmsButton.BackColor = Color.FromArgb(60, 60, 100); // Back to original purple
+                    _compareAlgorithmsButton.BackColor = Color.FromArgb(60, 60, 100);
             };
 
             _compareAlgorithmsButton.Click += btnCompareAlgorithms_Click;
         }
+
+        // Handles click event for comparing allocation algorithms
         private void btnCompareAlgorithms_Click(object sender, EventArgs e)
         {
             if (_lastOptimizedResults == null || _lastOptimizedResults.Count == 0)
@@ -104,23 +100,18 @@ namespace PerfumeAllocationSystem
 
             try
             {
-                // Create a simple allocation engine if it doesn't exist
                 if (_simpleAllocationEngine == null && _perfumes.Count > 0)
                 {
                     _simpleAllocationEngine = new SimpleAllocationEngine(_perfumes);
                 }
 
-                // Get a fresh copy of the store requirements (to ensure we start fresh)
                 List<StoreRequirement> freshStoreRequirements = _storeRequirements.Select(s => s.Clone()).ToList();
 
-                // Run the simple allocation
                 List<StoreRequirement> simpleResults = _simpleAllocationEngine.AllocatePerfumes(freshStoreRequirements);
                 decimal simpleProfit = _simpleAllocationEngine.GetTotalProfit();
 
-                // Get the profit from the optimized algorithm
                 decimal optimizedProfit = _allocationEngine.GetTotalProfit();
 
-                // Show the comparison report
                 ComparisonReportForm reportForm = new ComparisonReportForm(
                     _lastOptimizedResults, optimizedProfit,
                     simpleResults, simpleProfit);
@@ -138,7 +129,7 @@ namespace PerfumeAllocationSystem
             }
         }
 
-        // Add this method to view store requirements
+        // Displays detailed store requirements in a message box
         private void ShowStoreRequirements(StoreRequirement store)
         {
             StringBuilder sb = new StringBuilder();
@@ -168,7 +159,7 @@ namespace PerfumeAllocationSystem
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // Add this method to create a button to view requirements
+        // Adds a view requirements button to a container
         private void AddViewRequirementsButton(Control container, StoreRequirement store, Point location, Size size)
         {
             Button btnViewRequirements = new Button
@@ -189,6 +180,7 @@ namespace PerfumeAllocationSystem
             container.Controls.Add(btnViewRequirements);
         }
 
+        // Handles double-click event on store data grid to show requirements
         private void dgvStores_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.RowIndex < _storeRequirements.Count)
@@ -197,11 +189,13 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Sets the form's default font
         private void InitializeFormStyle()
         {
             Font = new Font("Segoe UI", 9F);
         }
 
+        // Configures tab control appearance and colors
         private void SetupTabControl()
         {
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -212,6 +206,7 @@ namespace PerfumeAllocationSystem
             tabAllocation.BackColor = Color.FromArgb(245, 245, 245);
         }
 
+        // Initializes labels, buttons, and timer components
         private void InitializeLabelsAndTimers()
         {
             StyleAllButtons();
@@ -219,6 +214,7 @@ namespace PerfumeAllocationSystem
             ConfigureMessageTimer();
         }
 
+        // Applies consistent styling to all buttons
         private void StyleAllButtons()
         {
             ApplyButtonStyle(btnAddStore);
@@ -226,13 +222,12 @@ namespace PerfumeAllocationSystem
             ApplyButtonStyle(btnRunAllocation);
             ApplyButtonStyle(btnClearStores);
             ApplyButtonStyle(btnReset);
-            // Removed btnLoadPerfumes and btnSaveResults references
         }
 
+        // Creates and positions the random store message label
         private void AddRandomStoreMessageLabel()
         {
-            // Calculate position relative to the Generate Random Store button
-            int labelY = btnGenerateRandomStore.Bottom + 20; // 20 pixels below the button
+            int labelY = btnGenerateRandomStore.Bottom + 20;
 
             lblRandomStoreMsg = new Label
             {
@@ -249,12 +244,14 @@ namespace PerfumeAllocationSystem
             groupBox1.Controls.Add(lblRandomStoreMsg);
         }
 
+        // Sets up the timer for hiding temporary messages
         private void ConfigureMessageTimer()
         {
             timerHideMsg = new Timer { Interval = 5000 };
             timerHideMsg.Tick += timerHideMsg_Tick;
         }
 
+        // Initializes all data grid view components
         private void SetupDataGridViews()
         {
             SetupPerfumesGrid();
@@ -262,12 +259,14 @@ namespace PerfumeAllocationSystem
             SetupResultsGrid();
         }
 
+        // Configures the perfumes data grid view
         private void SetupPerfumesGrid()
         {
             dgvPerfumes.AutoGenerateColumns = true;
             StyleDataGridView(dgvPerfumes);
         }
 
+        // Configures the stores data grid view with custom columns
         private void SetupStoresGrid()
         {
             dgvStores.AutoGenerateColumns = false;
@@ -296,6 +295,7 @@ namespace PerfumeAllocationSystem
             StyleDataGridView(dgvStores);
         }
 
+        // Configures the results data grid view with custom columns
         private void SetupResultsGrid()
         {
             dgvResults.AutoGenerateColumns = false;
@@ -334,18 +334,21 @@ namespace PerfumeAllocationSystem
             StyleDataGridView(dgvResults);
         }
 
+        // Initializes dropdown combo boxes with their options
         private void InitializeComboBoxes()
         {
             SetupGenderComboBox();
             SetupAccordComboBox();
         }
 
+        // Populates the gender combo box with options
         private void SetupGenderComboBox()
         {
             cboGender.Items.AddRange(new string[] { "Any", "Male", "Female", "Unisex" });
             cboGender.SelectedIndex = 0;
         }
 
+        // Populates the accord combo box with fragrance categories
         private void SetupAccordComboBox()
         {
             cboAccord.Items.Add("Any");
@@ -357,6 +360,7 @@ namespace PerfumeAllocationSystem
             cboAccord.SelectedIndex = 0;
         }
 
+        // Applies consistent styling to a button
         private void ApplyButtonStyle(Button button)
         {
             button.FlatStyle = FlatStyle.Flat;
@@ -370,6 +374,7 @@ namespace PerfumeAllocationSystem
             button.MouseLeave += Button_MouseLeave;
         }
 
+        // Handles mouse enter event for button hover effect
         private void Button_MouseEnter(object sender, EventArgs e)
         {
             if (sender is Button button)
@@ -378,6 +383,7 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Handles mouse leave event for button hover effect
         private void Button_MouseLeave(object sender, EventArgs e)
         {
             if (sender is Button button)
@@ -386,12 +392,14 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Applies consistent styling to data grid views
         private void StyleDataGridView(DataGridView dgv)
         {
             SetDataGridViewBasicStyle(dgv);
             SetDataGridViewHeaderStyle(dgv);
         }
 
+        // Sets basic visual styling for data grid view
         private void SetDataGridViewBasicStyle(DataGridView dgv)
         {
             dgv.BorderStyle = BorderStyle.None;
@@ -402,6 +410,7 @@ namespace PerfumeAllocationSystem
             dgv.BackgroundColor = Color.White;
         }
 
+        // Styles the header row of data grid view
         private void SetDataGridViewHeaderStyle(DataGridView dgv)
         {
             dgv.EnableHeadersVisualStyles = false;
@@ -411,11 +420,13 @@ namespace PerfumeAllocationSystem
             dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         }
 
+        // Handles custom drawing of tab control items
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             DrawTabItem(e);
         }
 
+        // Draws individual tab items with custom colors
         private void DrawTabItem(DrawItemEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -435,6 +446,7 @@ namespace PerfumeAllocationSystem
             backBrush.Dispose();
         }
 
+        // Determines colors for active and inactive tabs
         private void SetTabColors(int tabIndex, out Brush textBrush, out Brush backBrush)
         {
             if (tabControl1.SelectedIndex == tabIndex)
@@ -449,12 +461,14 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Hides temporary message labels when timer expires
         private void timerHideMsg_Tick(object sender, EventArgs e)
         {
             lblRandomStoreMsg.Visible = false;
             timerHideMsg.Stop();
         }
 
+        // Loads default CSV data or creates sample data if file not found
         private void LoadDefaultCsvData()
         {
             try
@@ -466,13 +480,9 @@ namespace PerfumeAllocationSystem
                 else
                 {
                     ShowDefaultFileNotFoundMessage();
-
-                    // Create a small test dataset to allow the application to function
-                    // even if the CSV file is missing
                     CreateDefaultPerfumeData();
                 }
 
-                // Ensure the allocation engine is always created if we have perfumes
                 if (_allocationEngine == null && _perfumes.Count > 0)
                 {
                     _allocationEngine = new AllocationEngine(_perfumes);
@@ -484,17 +494,15 @@ namespace PerfumeAllocationSystem
             catch (Exception ex)
             {
                 ShowLoadErrorMessage(ex);
-                // Create minimal perfume data to allow the app to function
                 CreateDefaultPerfumeData();
             }
         }
 
-        // This method creates a minimal set of test perfumes if the CSV file is missing
+        // Creates sample perfume data when CSV file is unavailable
         private void CreateDefaultPerfumeData()
         {
             _perfumes = new List<Perfume>();
 
-            // Add a few sample perfumes
             _perfumes.Add(new Perfume
             {
                 Name = "Sample Perfume 1",
@@ -540,7 +548,6 @@ namespace PerfumeAllocationSystem
                 Stock = 5
             });
 
-            // Update the data grid and create an allocation engine
             dgvPerfumes.DataSource = null;
             dgvPerfumes.DataSource = _perfumes;
             _allocationEngine = new AllocationEngine(_perfumes);
@@ -550,13 +557,13 @@ namespace PerfumeAllocationSystem
             btnGenerateRandomStore.Enabled = true;
         }
 
+        // Loads perfume data from CSV file and initializes allocation engine
         private void LoadCsvFile(string filePath)
         {
             _perfumes = _dataService.LoadPerfumesFromCsv(filePath);
             dgvPerfumes.DataSource = null;
             dgvPerfumes.DataSource = _perfumes;
 
-            // Make sure we always create the allocation engine
             _allocationEngine = new AllocationEngine(_perfumes);
             lblPerfumesSummary.Text = $"Loaded {_perfumes.Count} perfumes";
 
@@ -564,20 +571,21 @@ namespace PerfumeAllocationSystem
             btnGenerateRandomStore.Enabled = true;
         }
 
+        // Shows warning message when default CSV file is not found
         private void ShowDefaultFileNotFoundMessage()
         {
             MessageBox.Show($"Default fragrance data file not found! Please place '{DEFAULT_CSV_PATH}' in the application folder.",
                 "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
+        // Shows error message when loading CSV data fails
         private void ShowLoadErrorMessage(Exception ex)
         {
             MessageBox.Show($"Error loading default fragrance data: {ex.Message}",
                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        // Removed the btnLoadPerfumes_Click method entirely
-
+        // Handles add store button click to create new store requirement
         private void btnAddStore_Click(object sender, EventArgs e)
         {
             if (!ValidateStoreInputs())
@@ -591,6 +599,7 @@ namespace PerfumeAllocationSystem
             ClearStoreInputs();
         }
 
+        // Validates all store input fields for completeness and correctness
         private bool ValidateStoreInputs()
         {
             if (string.IsNullOrWhiteSpace(txtStoreName.Text))
@@ -608,7 +617,6 @@ namespace PerfumeAllocationSystem
             if (!ValidateNumericInput(txtMaxPrice.Text, "maximum price", out decimal maxPrice) || maxPrice <= 0)
                 return false;
 
-            // Add minimum price check - important new validation!
             if (maxPrice < GetMinimumPerfumePrice())
             {
                 MessageBox.Show($"Maximum price is too low. Minimum perfume price is ${GetMinimumPerfumePrice()}",
@@ -619,7 +627,6 @@ namespace PerfumeAllocationSystem
             if (!ValidateLongevityProjection())
                 return false;
 
-            // Check if the criteria are too restrictive
             if (CheckIfCriteriaTooRestrictive())
             {
                 var result = MessageBox.Show("The criteria you've entered are very restrictive. You might want to relax some requirements.\n" +
@@ -632,27 +639,31 @@ namespace PerfumeAllocationSystem
 
             return true;
         }
+
+        // Gets the minimum price from available perfumes
         private decimal GetMinimumPerfumePrice()
         {
             if (_perfumes.Count == 0) return 0;
             return _perfumes.Min(p => p.AveragePrice);
         }
 
+        // Gets the average price from available perfumes
         private decimal GetAveragePerfumePrice()
         {
-            if (_perfumes.Count == 0) return 100m; // Default fallback
+            if (_perfumes.Count == 0) return 100m;
             return _perfumes.Average(p => p.AveragePrice);
         }
 
+        // Gets the maximum price from available perfumes
         private decimal GetMaximumPerfumePrice()
         {
-            if (_perfumes.Count == 0) return 500m; // Default fallback
+            if (_perfumes.Count == 0) return 500m;
             return _perfumes.Max(p => p.AveragePrice);
         }
 
+        // Checks if store criteria are too restrictive by counting matching perfumes
         private bool CheckIfCriteriaTooRestrictive()
         {
-            // Check if there are at least some perfumes that match the basic criteria
             decimal maxPrice = decimal.Parse(txtMaxPrice.Text);
             int minLongevity = int.Parse(txtMinLongevity.Text);
             int minProjection = int.Parse(txtMinProjection.Text);
@@ -668,9 +679,10 @@ namespace PerfumeAllocationSystem
                 p.Projection >= minProjection
             );
 
-            return matchCount < 5; // If less than 5 perfumes match, criteria might be too restrictive
+            return matchCount < 5;
         }
 
+        // Validates numeric input for decimal values
         private bool ValidateNumericInput(string input, string fieldName, out decimal result)
         {
             if (!decimal.TryParse(input, out result) || result <= 0)
@@ -681,6 +693,7 @@ namespace PerfumeAllocationSystem
             return true;
         }
 
+        // Validates numeric input for integer values
         private bool ValidateNumericInput(string input, string fieldName, out int result)
         {
             if (!int.TryParse(input, out result) || result <= 0)
@@ -691,6 +704,7 @@ namespace PerfumeAllocationSystem
             return true;
         }
 
+        // Validates longevity and projection values are within acceptable range
         private bool ValidateLongevityProjection()
         {
             if (!int.TryParse(txtMinLongevity.Text, out int minLongevity) || minLongevity <= 0 || minLongevity > 10)
@@ -708,6 +722,7 @@ namespace PerfumeAllocationSystem
             return true;
         }
 
+        // Creates a store requirement object from form inputs
         private StoreRequirement CreateStoreFromInputs()
         {
             decimal budget = decimal.Parse(txtBudget.Text);
@@ -732,16 +747,19 @@ namespace PerfumeAllocationSystem
             };
         }
 
+        // Gets selected gender or empty string if "Any" is selected
         private string GetSelectedGender()
         {
             return cboGender.SelectedItem.ToString() == "Any" ? "" : cboGender.SelectedItem.ToString();
         }
 
+        // Gets selected accord or empty string if "Any" is selected
         private string GetSelectedAccord()
         {
             return cboAccord.SelectedItem.ToString() == "Any" ? "" : cboAccord.SelectedItem.ToString();
         }
 
+        // Handles generate random store button click
         private void btnGenerateRandomStore_Click(object sender, EventArgs e)
         {
             if (_perfumes.Count == 0)
@@ -754,6 +772,7 @@ namespace PerfumeAllocationSystem
             ShowRandomGenerationMessage();
         }
 
+        // Generates random data for all store requirement fields
         private void GenerateRandomStoreData()
         {
             GenerateBasicStoreInfo();
@@ -761,33 +780,30 @@ namespace PerfumeAllocationSystem
             GenerateImprovedQualitySettings();
         }
 
+        // Generates basic store information like name, budget, and quantity
         private void GenerateBasicStoreInfo()
         {
             txtStoreName.Text = $"Store_{_random.Next(1, 1000)}";
 
-            // Increase budget range for better allocation possibilities
             txtBudget.Text = _random.Next(800, 8001).ToString();
 
-            // Slightly lower quantity requests to balance with budget
             txtQuantity.Text = _random.Next(3, 15).ToString();
 
-            // Higher chance of selecting "Any" gender for more flexibility
             string[] genders = { "Any", "Any", "Male", "Female", "Unisex" };
             cboGender.SelectedItem = genders[_random.Next(genders.Length)];
 
-            // Higher chance of selecting "Any" accord for more flexibility
             string[] accords = {
-                "Any", "Any", "Any", // Added more "Any" options to increase probability
+                "Any", "Any", "Any",
                 "Aromatic", "Woody", "Fresh", "Sweet", "Floral", "Citrus",
                 "Oriental", "Fruity", "Spicy"
             };
             cboAccord.SelectedItem = accords[_random.Next(accords.Length)];
         }
 
+        // Generates random perfume note preferences based on existing perfumes
         private void GenerateRandomNotes()
         {
-            // 40% chance of having no specific notes requirement
-            if (_random.Next(100) < 40)
+            if (_random.Next(100) < 30)
             {
                 txtTopNotes.Text = "";
                 txtMiddleNotes.Text = "";
@@ -801,29 +817,25 @@ namespace PerfumeAllocationSystem
 
             if (_perfumes.Count > 0)
             {
-                // Get the most common notes to increase match probability
                 ExtractCommonNotesFromPerfumes(ref topNote, ref middleNote, ref baseNote);
             }
 
-            // 50% chance for each note to be used (allows for partial notes specification)
             txtTopNotes.Text = _random.Next(100) < 50 ? topNote : "";
             txtMiddleNotes.Text = _random.Next(100) < 50 ? middleNote : "";
             txtBaseNotes.Text = _random.Next(100) < 50 ? baseNote : "";
         }
 
+        // Extracts common notes from sample perfumes to improve matching probability
         private void ExtractCommonNotesFromPerfumes(ref string topNote, ref string middleNote, ref string baseNote)
         {
-            // Sample multiple perfumes to find common notes
             var sampleSize = Math.Min(10, _perfumes.Count);
             var samplePerfumes = new List<Perfume>();
 
-            // Take a random sample of perfumes
             for (int i = 0; i < sampleSize; i++)
             {
                 samplePerfumes.Add(_perfumes[_random.Next(_perfumes.Count)]);
             }
 
-            // Extract and count top notes
             var topNotes = new Dictionary<string, int>();
             var middleNotes = new Dictionary<string, int>();
             var baseNotes = new Dictionary<string, int>();
@@ -835,12 +847,12 @@ namespace PerfumeAllocationSystem
                 ProcessNotes(perfume.BaseNotes, baseNotes);
             }
 
-            // Select most common notes
             topNote = GetMostCommonNote(topNotes);
             middleNote = GetMostCommonNote(middleNotes);
             baseNote = GetMostCommonNote(baseNotes);
         }
 
+        // Processes note string and counts occurrences in dictionary
         private void ProcessNotes(string notesList, Dictionary<string, int> noteCount)
         {
             if (!string.IsNullOrEmpty(notesList))
@@ -860,6 +872,7 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Returns the most frequently occurring note from the dictionary
         private string GetMostCommonNote(Dictionary<string, int> noteCount)
         {
             if (noteCount.Count == 0)
@@ -868,30 +881,27 @@ namespace PerfumeAllocationSystem
             return noteCount.OrderByDescending(x => x.Value).First().Key;
         }
 
+        // Generates random quality settings with realistic price constraints
         private void GenerateImprovedQualitySettings()
         {
-            // Lower minimum requirements for better match probability but with some variation
             txtMinLongevity.Text = _random.Next(1, 8).ToString();
             txtMinProjection.Text = _random.Next(1, 8).ToString();
 
-            // Get price ranges
             decimal minPrice = GetMinimumPerfumePrice();
             decimal avgPrice = GetAveragePerfumePrice();
             decimal maxPrice = GetMaximumPerfumePrice();
 
-            // Add randomization factor (between 60% and 95% of max price)
             decimal randomFactor = (decimal)(_random.NextDouble() * 0.35 + 0.60);
             decimal targetPrice = maxPrice * randomFactor;
 
-            // Ensure it's at least 20% above min price
             targetPrice = Math.Max(targetPrice, minPrice * 1.2m);
 
-            // Round to nearest $10
             targetPrice = Math.Round(targetPrice / 10) * 10;
 
             txtMaxPrice.Text = targetPrice.ToString();
         }
 
+        // Shows temporary message confirming random generation
         private void ShowRandomGenerationMessage()
         {
             lblRandomStoreMsg.Visible = true;
@@ -899,6 +909,7 @@ namespace PerfumeAllocationSystem
             timerHideMsg.Start();
         }
 
+        // Updates the store requirements data grid with current data
         private void UpdateStoreRequirementsGrid()
         {
             dgvStores.DataSource = null;
@@ -906,6 +917,7 @@ namespace PerfumeAllocationSystem
             btnRunAllocation.Enabled = _storeRequirements.Count > 0;
         }
 
+        // Clears all store input fields and resets to default values
         private void ClearStoreInputs()
         {
             txtStoreName.Text = "";
@@ -916,11 +928,12 @@ namespace PerfumeAllocationSystem
             txtTopNotes.Text = "";
             txtMiddleNotes.Text = "";
             txtBaseNotes.Text = "";
-            txtMinLongevity.Text = "1"; // Changed from "0" to "1"
-            txtMinProjection.Text = "1"; // Changed from "0" to "1"
+            txtMinLongevity.Text = "1";
+            txtMinProjection.Text = "1";
             txtMaxPrice.Text = "";
         }
 
+        // Handles run allocation button click to execute perfume allocation
         private void btnRunAllocation_Click(object sender, EventArgs e)
         {
             if (!ValidateAllocationRequirements())
@@ -929,6 +942,7 @@ namespace PerfumeAllocationSystem
             RunAllocationProcess();
         }
 
+        // Validates that allocation can be run with current data
         private bool ValidateAllocationRequirements()
         {
             if (_allocationEngine == null)
@@ -946,15 +960,14 @@ namespace PerfumeAllocationSystem
             return true;
         }
 
+        // Executes the complete allocation process and displays results
         private void RunAllocationProcess()
         {
-            // Additional check to ensure the allocation engine is initialized
             if (_allocationEngine == null && _perfumes.Count > 0)
             {
                 _allocationEngine = new AllocationEngine(_perfumes);
             }
 
-            // Verify again that we have an allocation engine
             if (_allocationEngine == null)
             {
                 MessageBox.Show("Cannot run allocation - perfume data could not be loaded. Please check that the CSV file exists.",
@@ -962,7 +975,6 @@ namespace PerfumeAllocationSystem
                 return;
             }
 
-            // Before allocation, check if stores have any matching perfumes
             var problematicStores = new List<string>();
 
             foreach (var store in _storeRequirements)
@@ -987,16 +999,13 @@ namespace PerfumeAllocationSystem
 
             List<StoreRequirement> results = _allocationEngine.AllocatePerfumes(_storeRequirements);
 
-            // Store the results for comparison
             _lastOptimizedResults = results;
 
-            // Enable the compare button now that we have results
             if (_compareAlgorithmsButton != null)
             {
                 _compareAlgorithmsButton.Enabled = true;
             }
 
-            // Check for stores with 0% satisfaction after allocation
             var zeroSatisfactionStores = results.Where(s => s.SatisfactionPercentage == 0).ToList();
             if (zeroSatisfactionStores.Any())
             {
@@ -1014,6 +1023,7 @@ namespace PerfumeAllocationSystem
             DisplayTotalProfitSummary(profit);
         }
 
+        // Counts perfumes that match a store's requirements
         private int CountMatchingPerfumes(StoreRequirement store)
         {
             return _perfumes.Count(p =>
@@ -1025,7 +1035,7 @@ namespace PerfumeAllocationSystem
             );
         }
 
-
+        // Displays allocation results in the main results grid
         private void DisplayResults(List<StoreRequirement> results)
         {
             dgvResults.DataSource = null;
@@ -1035,11 +1045,12 @@ namespace PerfumeAllocationSystem
             lblTotalProfit.Text = $"Total Profit: {profit:C}";
         }
 
+        // Enables UI features that become available after allocation
         private void EnableResultsFeatures()
         {
-            // Removed btnSaveResults.Enabled = true;
         }
 
+        // Shows detailed allocation information for each store
         private void ShowAllocationDetails(List<StoreRequirement> results)
         {
             pnlAllocationDetails.Controls.Clear();
@@ -1051,19 +1062,20 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Adds a detail panel for a single store's allocation results
         private void AddStoreDetailPanel(StoreRequirement store, ref int yPos)
         {
             GroupBox groupBox = CreateStoreGroupBox(store, yPos);
             AddStoreMetricsLabels(store, groupBox);
             AddPerfumesList(store, groupBox);
 
-            // Add view requirements button
             AddViewRequirementsButton(groupBox, store, new Point(groupBox.Width - 150, 20), new Size(130, 25));
 
             pnlAllocationDetails.Controls.Add(groupBox);
             yPos += groupBox.Height + 10;
         }
 
+        // Creates a group box container for store details
         private GroupBox CreateStoreGroupBox(StoreRequirement store, int yPos)
         {
             return new GroupBox
@@ -1075,6 +1087,7 @@ namespace PerfumeAllocationSystem
             };
         }
 
+        // Adds metric labels showing store satisfaction and budget information
         private void AddStoreMetricsLabels(StoreRequirement store, GroupBox groupBox)
         {
             Label lblSatisfaction = new Label
@@ -1110,6 +1123,7 @@ namespace PerfumeAllocationSystem
             groupBox.Controls.Add(lblPerfumes);
         }
 
+        // Adds a list box showing allocated perfumes for the store
         private void AddPerfumesList(StoreRequirement store, GroupBox groupBox)
         {
             ListBox lstPerfumes = new ListBox
@@ -1127,28 +1141,25 @@ namespace PerfumeAllocationSystem
             groupBox.Controls.Add(lstPerfumes);
         }
 
-        // Helper method to handle key press events for numeric text boxes
+        // Handles key press events for numeric text boxes to allow only valid input
         private void NumericTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Allow only digits and control characters
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
             {
                 e.Handled = true;
             }
 
-            // Special handling for "0" - don't allow as first character
             if (e.KeyChar == '0' && (sender as TextBox).Text.Length == 0)
             {
                 e.Handled = true;
             }
         }
 
+        // Displays profit summary panel with allocation statistics
         private void DisplayTotalProfitSummary(decimal profit)
         {
-            // Remove any existing profit panels first
             Panel panelToRemove = null;
 
-            // First, find the panel (if it exists)
             foreach (Control ctrl in tabAllocation.Controls)
             {
                 if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
@@ -1157,14 +1168,12 @@ namespace PerfumeAllocationSystem
                 }
             }
 
-            // Then, remove it if found
             if (panelToRemove != null)
             {
                 tabAllocation.Controls.Remove(panelToRemove);
                 panelToRemove.Dispose();
             }
 
-            // Create a profit summary panel at the top of the allocation results
             Panel profitPanel = new Panel
             {
                 Name = "profitSummaryPanel",
@@ -1210,10 +1219,9 @@ namespace PerfumeAllocationSystem
                 Location = new Point(500, 30)
             };
 
-            // Add the compare algorithms button to the summary panel
             if (_compareAlgorithmsButton != null)
             {
-                _compareAlgorithmsButton.Location = new Point(800, 15); // Position in the yellow area
+                _compareAlgorithmsButton.Location = new Point(800, 15);
                 _compareAlgorithmsButton.Enabled = true;
                 profitPanel.Controls.Add(_compareAlgorithmsButton);
             }
@@ -1223,25 +1231,22 @@ namespace PerfumeAllocationSystem
             profitPanel.Controls.Add(lblStoreCount);
             profitPanel.Controls.Add(lblAverageSatisfaction);
 
-            // Insert at the top of the panel
             tabAllocation.Controls.Add(profitPanel);
             profitPanel.BringToFront();
         }
 
+        // Creates a new tab page with detailed allocation results
         private void CreateResultsTab(List<StoreRequirement> results, decimal totalProfit)
         {
-            // Create new tab page
             TabPage tabResult = new TabPage($"Results {DateTime.Now.ToString("HH:mm:ss")}");
 
-            // Create a header panel with detailed profit info
             Panel headerPanel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 120, // Make it taller to fit more stats
+                Height = 120,
                 BackColor = Color.FromArgb(60, 60, 100)
             };
 
-            // Add title
             Label lblTitle = new Label
             {
                 Text = "Allocation Results Summary",
@@ -1252,7 +1257,6 @@ namespace PerfumeAllocationSystem
             };
             headerPanel.Controls.Add(lblTitle);
 
-            // Calculate additional statistics
             int totalItemsRequested = results.Sum(s => s.QuantityNeeded);
             int totalItemsAllocated = results.Sum(s => s.AllocatedPerfumes.Count);
             decimal totalBudget = results.Sum(s => s.Budget);
@@ -1260,7 +1264,6 @@ namespace PerfumeAllocationSystem
             double avgSatisfaction = results.Average(s => s.SatisfactionPercentage);
             int storesAboveTarget = results.Count(s => s.SatisfactionPercentage >= 70.0);
 
-            // Create a table layout for statistics
             TableLayoutPanel statsTable = new TableLayoutPanel
             {
                 Location = new Point(20, 40),
@@ -1277,10 +1280,8 @@ namespace PerfumeAllocationSystem
             AddStatLabel(statsTable, "Stores Above 70%:", $"{storesAboveTarget} of {results.Count}", 3, 0);
             AddStatLabel(statsTable, "Avg. Satisfaction:", $"{avgSatisfaction:F2}%", 3, 1);
 
-            // Add the table to the header
             headerPanel.Controls.Add(statsTable);
 
-            // Add the compare algorithms button to this tab's header panel
             Button tabCompareButton = new Button
             {
                 Text = "Compare Algorithms",
@@ -1291,21 +1292,19 @@ namespace PerfumeAllocationSystem
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 Name = "tabCompareButton",
-                Location = new Point(800, 15) // Position on the right side
+                Location = new Point(800, 15)
             };
 
             tabCompareButton.Click += btnCompareAlgorithms_Click;
             ApplyButtonStyle(tabCompareButton);
             headerPanel.Controls.Add(tabCompareButton);
 
-            // Main panel with auto scroll
             Panel mainPanel = new Panel
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true
             };
 
-            // Create a table layout - 4 stores per row
             TableLayoutPanel storeGrid = new TableLayoutPanel
             {
                 ColumnCount = 4,
@@ -1315,19 +1314,16 @@ namespace PerfumeAllocationSystem
                 Padding = new Padding(5)
             };
 
-            // Set column widths evenly
             for (int i = 0; i < storeGrid.ColumnCount; i++)
             {
                 storeGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             }
 
-            // Add stores to the grid
             int col = 0;
             int row = 0;
 
             foreach (var store in results)
             {
-                // Create store panel
                 Panel storePanel = new Panel
                 {
                     Dock = DockStyle.Fill,
@@ -1336,7 +1332,6 @@ namespace PerfumeAllocationSystem
                     Height = 400
                 };
 
-                // Store name at the top
                 Label lblStoreName = new Label
                 {
                     Text = $"Store name: {store.StoreName}",
@@ -1346,7 +1341,6 @@ namespace PerfumeAllocationSystem
                 };
                 storePanel.Controls.Add(lblStoreName);
 
-                // Create satisfaction panel with colored background
                 Panel satisfactionPanel = new Panel
                 {
                     Location = new Point(5, 25),
@@ -1367,7 +1361,6 @@ namespace PerfumeAllocationSystem
                 satisfactionPanel.Controls.Add(lblSatisfaction);
                 storePanel.Controls.Add(satisfactionPanel);
 
-                // Add requested/allocated info
                 Label lblRequestInfo = new Label
                 {
                     Text = $"Requested: {store.QuantityNeeded}   Allocated: {store.AllocatedPerfumes.Count}   Remaining: {store.RemainingQuantity}",
@@ -1377,7 +1370,6 @@ namespace PerfumeAllocationSystem
                 };
                 storePanel.Controls.Add(lblRequestInfo);
 
-                // Add budget info
                 Label lblBudgetInfo = new Label
                 {
                     Text = $"Budget: {store.Budget:C}   Spent: {store.TotalSpent:C}   Remaining: {store.RemainingBudget:C}",
@@ -1387,7 +1379,6 @@ namespace PerfumeAllocationSystem
                 };
                 storePanel.Controls.Add(lblBudgetInfo);
 
-                // Perfume list header
                 Label lblPerfumeHeader = new Label
                 {
                     Text = "List of the perfumes:",
@@ -1397,18 +1388,16 @@ namespace PerfumeAllocationSystem
                 };
                 storePanel.Controls.Add(lblPerfumeHeader);
 
-                // Perfume list - slightly shorter to make room for expand button
                 ListBox lstPerfumes = new ListBox
                 {
                     Location = new Point(5, 115),
-                    Size = new Size(storePanel.Width - 15, 205), // Shorter to make room for buttons
+                    Size = new Size(storePanel.Width - 15, 205),
                     Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
                     BorderStyle = BorderStyle.None,
                     Font = new Font("Segoe UI", 8.5F),
                     IntegralHeight = false
                 };
 
-                // Add perfumes to the list
                 foreach (var perfume in store.AllocatedPerfumes)
                 {
                     lstPerfumes.Items.Add($"{perfume.Brand} - {perfume.Name} (${perfume.AveragePrice})");
@@ -1416,26 +1405,23 @@ namespace PerfumeAllocationSystem
 
                 storePanel.Controls.Add(lstPerfumes);
 
-                // Add View Requirements button
                 AddViewRequirementsButton(storePanel, store, new Point(5, 325), new Size(storePanel.Width - 15, 30));
 
-                // Add Expand button for stores with satisfaction under 70%
                 if (store.SatisfactionPercentage < 70.0)
                 {
                     Button btnExpand = new Button
                     {
                         Text = "Explain Low Satisfaction",
-                        Location = new Point(5, 360), // Position below the view requirements button
+                        Location = new Point(5, 360),
                         Size = new Size(storePanel.Width - 15, 30),
                         BackColor = Color.FromArgb(180, 180, 180),
                         ForeColor = Color.Black,
                         FlatStyle = FlatStyle.Flat,
                         Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                        Tag = GetSatisfactionExplanation(store), // Store explanation in tag
+                        Tag = GetSatisfactionExplanation(store),
                         Cursor = Cursors.Hand
                     };
 
-                    // Add click event handler
                     btnExpand.Click += (sender, e) =>
                     {
                         Button button = (Button)sender;
@@ -1447,16 +1433,13 @@ namespace PerfumeAllocationSystem
                     storePanel.Controls.Add(btnExpand);
                 }
 
-                // Add to grid
                 storeGrid.Controls.Add(storePanel, col, row);
 
-                // Move to next column or row
                 col++;
                 if (col >= storeGrid.ColumnCount)
                 {
                     col = 0;
                     row++;
-                    // Add a new row if needed
                     if (row >= storeGrid.RowCount && row < (results.Count / storeGrid.ColumnCount) + 1)
                     {
                         storeGrid.RowCount++;
@@ -1464,17 +1447,15 @@ namespace PerfumeAllocationSystem
                 }
             }
 
-            // Add components to tab
             mainPanel.Controls.Add(storeGrid);
             tabResult.Controls.Add(mainPanel);
             tabResult.Controls.Add(headerPanel);
 
-            // Add tab to control
             tabControl1.TabPages.Add(tabResult);
             tabControl1.SelectedTab = tabResult;
         }
 
-        // Helper method for the CreateResultsTab method
+        // Adds a statistic label to the table layout panel
         private void AddStatLabel(TableLayoutPanel table, string title, string value, int col, int row, bool isHighlight = false)
         {
             Panel statPanel = new Panel
@@ -1507,13 +1488,11 @@ namespace PerfumeAllocationSystem
             table.Controls.Add(statPanel, col, row);
         }
 
-        // Helper method to generate explanations for low satisfaction
+        // Generates detailed explanation for stores with low satisfaction scores
         private string GetSatisfactionExplanation(StoreRequirement store)
         {
-            // Base explanation
             string explanation = $"Satisfaction Analysis for {store.StoreName}:\n\n";
 
-            // Check if actually allocated anything
             if (store.AllocatedPerfumes.Count == 0)
             {
                 explanation += "• NO PERFUMES WERE ALLOCATED\n";
@@ -1530,36 +1509,30 @@ namespace PerfumeAllocationSystem
             }
             else
             {
-                // Check allocated vs requested
                 if (store.AllocatedPerfumes.Count < store.QuantityNeeded)
                 {
                     explanation += $"• Insufficient quantity: Only allocated {store.AllocatedPerfumes.Count} of {store.QuantityNeeded} requested perfumes.\n\n";
                 }
 
-                // Check budget constraints
                 if (store.RemainingBudget < store.MaxPrice)
                 {
                     explanation += $"• Budget constraints: Remaining budget (${store.RemainingBudget}) is insufficient for additional perfumes.\n\n";
                 }
 
-                // Check preference matches
                 explanation += "• Preference matching issues:\n";
 
-                // Check gender preference
                 if (!string.IsNullOrEmpty(store.Gender))
                 {
                     int matchingGender = store.AllocatedPerfumes.Count(p => p.Gender == store.Gender || p.Gender == "Unisex");
                     explanation += $"  - Gender match: {matchingGender}/{store.AllocatedPerfumes.Count} perfumes\n";
                 }
 
-                // Check accord preference
                 if (!string.IsNullOrEmpty(store.PreferredAccord))
                 {
                     int matchingAccord = store.AllocatedPerfumes.Count(p => p.MainAccord == store.PreferredAccord);
                     explanation += $"  - Accord match: {matchingAccord}/{store.AllocatedPerfumes.Count} perfumes\n";
                 }
 
-                // Check notes preferences
                 if (!string.IsNullOrEmpty(store.PreferredTopNotes) ||
                     !string.IsNullOrEmpty(store.PreferredMiddleNotes) ||
                     !string.IsNullOrEmpty(store.PreferredBaseNotes))
@@ -1574,7 +1547,6 @@ namespace PerfumeAllocationSystem
                     explanation += "\n";
                 }
 
-                // Check quality requirements
                 if (store.MinLongevity > 0 || store.MinProjection > 0)
                 {
                     explanation += $"  - Quality requirements: Min. Longevity {store.MinLongevity}/10, Min. Projection {store.MinProjection}/10\n";
@@ -1591,18 +1563,18 @@ namespace PerfumeAllocationSystem
             return explanation;
         }
 
+        // Returns color based on satisfaction percentage for visual feedback
         private Color GetSatisfactionColor(double satisfaction)
         {
-            if (satisfaction >= 90) return Color.FromArgb(46, 139, 87); // Green
-            if (satisfaction >= 80) return Color.FromArgb(60, 179, 113); // Medium Sea Green
-            if (satisfaction >= 70) return Color.FromArgb(46, 204, 113); // Emerald
-            if (satisfaction >= 60) return Color.FromArgb(241, 196, 15); // Yellow
-            if (satisfaction >= 50) return Color.FromArgb(243, 156, 18); // Orange
-            return Color.FromArgb(231, 76, 60); // Red
+            if (satisfaction >= 90) return Color.FromArgb(46, 139, 87);
+            if (satisfaction >= 80) return Color.FromArgb(60, 179, 113);
+            if (satisfaction >= 70) return Color.FromArgb(46, 204, 113);
+            if (satisfaction >= 60) return Color.FromArgb(241, 196, 15);
+            if (satisfaction >= 50) return Color.FromArgb(243, 156, 18);
+            return Color.FromArgb(231, 76, 60);
         }
 
-        // Removed the btnSaveResults_Click method entirely
-
+        // Handles clear stores button click with confirmation
         private void btnClearStores_Click(object sender, EventArgs e)
         {
             if (ConfirmClearStores())
@@ -1614,56 +1586,38 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Shows confirmation dialog for clearing all stores
         private bool ConfirmClearStores()
         {
             return MessageBox.Show("Are you sure you want to clear all stores?", "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
         }
 
-        // Enhanced PerformFullReset method to properly clear ALL allocation data
+        // Performs complete reset of all application data and UI state
         private void PerformFullReset()
         {
-            // Clear data collections
             ClearCollections();
-
-            // Clear data grids
             ClearDataGrids();
-
-            // Clear panels and results
             ClearAllocationResults();
-
-            // Reset labels
             ResetLabels();
-
-            // Disable buttons
             DisableButtons();
-
-            // Remove dynamic tabs
             RemoveDynamicTabs();
 
-            // Reset the last optimized results
             _lastOptimizedResults = null;
-
-            // Clear all allocation engines
             _allocationEngine = null;
             _simpleAllocationEngine = null;
-
-            // Ensure we have a new DataService
             _dataService = new DataService();
 
-            // Switch to the first tab
             tabControl1.SelectedIndex = 0;
         }
-        // New method to thoroughly clear all allocation results
+
+        // Clears allocation results from UI panels and displays
         private void ClearAllocationResults()
         {
-            // Clear the details panel
             pnlAllocationDetails.Controls.Clear();
 
-            // Remove profit summary panel if it exists
             Panel panelToRemove = null;
 
-            // First, find the panel (if it exists)
             foreach (Control ctrl in tabAllocation.Controls)
             {
                 if (ctrl is Panel && ctrl.Name == "profitSummaryPanel")
@@ -1672,21 +1626,17 @@ namespace PerfumeAllocationSystem
                 }
             }
 
-            // Then, remove it if found
             if (panelToRemove != null)
             {
                 tabAllocation.Controls.Remove(panelToRemove);
                 panelToRemove.Dispose();
             }
 
-            // Clear any data binding
             dgvResults.DataSource = null;
-
-            // Reset profit
             lblTotalProfit.Text = "Total Profit: $0.00";
         }
 
-        // Modified btnReset_Click method to ensure all UI is updated after reset
+        // Handles reset button click with confirmation and updates display
         private void btnReset_Click(object sender, EventArgs e)
         {
             if (ConfirmReset())
@@ -1694,41 +1644,37 @@ namespace PerfumeAllocationSystem
                 PerformFullReset();
                 LoadDefaultCsvData();
 
-                // Force refresh the UI
                 Application.DoEvents();
 
-                // Focus on the first tab and update display
                 tabControl1.SelectedIndex = 0;
                 UpdateDisplay();
             }
         }
 
-        // New method to update the display after major changes
+        // Refreshes all UI displays after reset operation
         private void UpdateDisplay()
         {
-            // Clear and refresh data grids
             dgvPerfumes.Refresh();
             dgvStores.Refresh();
             dgvResults.Refresh();
 
-            // Update total profit display
             lblTotalProfit.Text = "Total Profit: $0.00";
 
-            // Force redraw of the allocation panel
             pnlAllocationDetails.Invalidate();
             pnlAllocationDetails.Update();
 
-            // Update tab control display
             tabControl1.Invalidate();
             tabControl1.Update();
         }
 
+        // Shows confirmation dialog for reset operation
         private bool ConfirmReset()
         {
             return MessageBox.Show("Are you sure you want to reset everything?", "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
         }
 
+        // Clears all data collections and allocation engine
         private void ClearCollections()
         {
             _perfumes.Clear();
@@ -1736,6 +1682,7 @@ namespace PerfumeAllocationSystem
             _allocationEngine = null;
         }
 
+        // Clears data from all data grid views
         private void ClearDataGrids()
         {
             dgvPerfumes.DataSource = null;
@@ -1743,30 +1690,31 @@ namespace PerfumeAllocationSystem
             dgvResults.DataSource = null;
         }
 
+        // Clears all detail panels from allocation display
         private void ClearDetailPanels()
         {
             pnlAllocationDetails.Controls.Clear();
         }
 
+        // Resets all informational labels to default states
         private void ResetLabels()
         {
             lblPerfumesSummary.Text = "";
             lblTotalProfit.Text = "Total Profit: $0.00";
         }
 
+        // Disables buttons that require data to function
         private void DisableButtons()
         {
             btnAddStore.Enabled = false;
             btnGenerateRandomStore.Enabled = false;
             btnRunAllocation.Enabled = false;
 
-            // Disable the main compare algorithms button if it exists
             if (_compareAlgorithmsButton != null)
             {
                 _compareAlgorithmsButton.Enabled = false;
             }
 
-            // Disable any compare buttons on result panels
             foreach (TabPage tab in tabControl1.TabPages)
             {
                 foreach (Control ctrl in tab.Controls)
@@ -1785,6 +1733,7 @@ namespace PerfumeAllocationSystem
             }
         }
 
+        // Removes dynamically created result tabs from tab control
         private void RemoveDynamicTabs()
         {
             for (int i = tabControl1.TabPages.Count - 1; i >= 3; i--)
@@ -1793,11 +1742,9 @@ namespace PerfumeAllocationSystem
             }
         }
 
-        // Add empty handler for CellContentClick if it's referenced in Designer
+        // Empty handler for data grid view cell content click events
         private void dgvPerfumes_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            // This is an empty handler to fix the designer error
-            // No action needed as we don't require cell click functionality
         }
     }
 }

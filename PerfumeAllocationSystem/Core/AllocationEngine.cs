@@ -4,7 +4,6 @@ using PerfumeAllocationSystem.Models;
 
 namespace PerfumeAllocationSystem.Core
 {
-    
     public class PerfumeMatch
     {
         public double MatchPercentage { get; set; }
@@ -24,14 +23,16 @@ namespace PerfumeAllocationSystem.Core
         private const double TargetSatisfactionGoal = 70.0;
         private List<StoreRequirement> _allocationResults = new List<StoreRequirement>();
         private decimal _totalProfit = 0;
+        private int _maxBacktrackingIterations = 10000;
+        private int _currentBacktrackingIterations = 0;
 
-        // Initializes the allocation engine with a list of perfumes
+        // Initializes allocation engine with perfume inventory
         public AllocationEngine(List<Perfume> perfumes)
         {
             InitializeInventory(perfumes);
         }
 
-        // Adds perfumes to the inventory dictionary
+        // Builds perfume inventory dictionary with brand_name keys
         private void InitializeInventory(List<Perfume> perfumes)
         {
             foreach (var perfume in perfumes)
@@ -41,7 +42,7 @@ namespace PerfumeAllocationSystem.Core
             }
         }
 
-        // Allocates perfumes to stores based on requirements and returns results
+        // Main allocation method that processes all stores and returns results
         public List<StoreRequirement> AllocatePerfumes(List<StoreRequirement> storeRequirements)
         {
             ResetAllocationData();
@@ -52,7 +53,7 @@ namespace PerfumeAllocationSystem.Core
             return _allocationResults;
         }
 
-        // Sorts stores by budget in descending order
+        // Sorts stores by budget in descending order for priority allocation
         private List<StoreRequirement> SortStoresByBudgetDescending(List<StoreRequirement> storeRequirements)
         {
             List<StoreRequirement> sortedStores = new List<StoreRequirement>(storeRequirements);
@@ -60,20 +61,20 @@ namespace PerfumeAllocationSystem.Core
             return sortedStores;
         }
 
-        // Comparer for sorting stores by budget (descending)
+        // Compares two stores by budget for sorting
         private int CompareBudgetDescending(StoreRequirement store1, StoreRequirement store2)
         {
             return store2.Budget.CompareTo(store1.Budget);
         }
 
-        // Resets allocation data for a new allocation run
+        // Clears previous allocation results and profit tracking
         private void ResetAllocationData()
         {
             _allocationResults.Clear();
             _totalProfit = 0;
         }
 
-        // Creates a deep copy of the perfume inventory
+        // Creates deep copy of inventory for allocation operations
         private Dictionary<string, Perfume> CreateWorkingInventoryCopy()
         {
             Dictionary<string, Perfume> workingInventory = new Dictionary<string, Perfume>();
@@ -84,7 +85,7 @@ namespace PerfumeAllocationSystem.Core
             return workingInventory;
         }
 
-        // Processes all store allocations in priority order
+        // Processes allocation for each store in priority order
         private void ProcessStoreAllocations(List<StoreRequirement> sortedStores, Dictionary<string, Perfume> workingInventory)
         {
             foreach (var store in sortedStores)
@@ -96,272 +97,143 @@ namespace PerfumeAllocationSystem.Core
             }
         }
 
-        // Allocates perfumes to a single store based on its requirements
+        // Allocates perfumes to a single store using two-phase approach
         private void AllocateToStore(StoreRequirement store, Dictionary<string, Perfume> inventory)
-        {
-            InitializeStoreAllocation(store);
-            List<PerfumeMatch> perfumeHeap = BuildPerfumeHeap(store, inventory);
-            AllocateBestMatches(store, inventory, perfumeHeap);
-
-            if (store.RemainingQuantity > 0)
-            {
-                BacktrackAllocate(store, inventory);
-            }
-        }
-
-        // Initializes store allocation data
-        private void InitializeStoreAllocation(StoreRequirement store)
         {
             store.AllocatedPerfumes.Clear();
             store.TotalSpent = 0;
+
+            List<PerfumeMatch> bestMatches = GetPerfumeMatches(store, inventory, MinimumSatisfactionRequired);
+            AllocateMatches(store, inventory, bestMatches);
+
+            if (store.RemainingQuantity > 0)
+            {
+                List<PerfumeMatch> alternatives = GetPerfumeMatches(store, inventory, 40.0, MinimumSatisfactionRequired);
+                AllocateMatches(store, inventory, alternatives);
+            }
         }
 
-        // Creates a priority list of perfumes matching store requirements 
-        private List<PerfumeMatch> BuildPerfumeHeap(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        // Gets perfumes matching satisfaction criteria sorted by match percentage
+        private List<PerfumeMatch> GetPerfumeMatches(StoreRequirement store, Dictionary<string, Perfume> inventory,
+                                                   double minSatisfaction, double maxSatisfaction = 100.0)
         {
-            List<PerfumeMatch> perfumeHeap = new List<PerfumeMatch>();
+            List<PerfumeMatch> matches = new List<PerfumeMatch>();
 
             foreach (var kvp in inventory)
             {
                 Perfume perfume = kvp.Value;
-                if (IsPerfumeEligible(perfume, store))
+                if (perfume.Stock > 0 && perfume.AveragePrice <= store.MaxPrice)
                 {
                     double matchPercentage = perfume.CalculateMatchPercentage(store);
-                    if (matchPercentage >= MinimumSatisfactionRequired)
+                    if (matchPercentage >= minSatisfaction && matchPercentage < maxSatisfaction)
                     {
-                        perfumeHeap.Add(new PerfumeMatch(matchPercentage, perfume));
+                        matches.Add(new PerfumeMatch(matchPercentage, perfume));
                     }
                 }
             }
 
-            SortPerfumeMatchesByScoreDescending(perfumeHeap);
-            return perfumeHeap;
-        }
-
-        // Sorts perfume matches by score in descending order
-        private void SortPerfumeMatchesByScoreDescending(List<PerfumeMatch> matches)
-        {
             matches.Sort(ComparePerfumeMatchDescending);
+            return matches;
         }
 
-        // Comparer for sorting perfume matches by score (descending)
+        // Compares perfume matches by percentage for sorting
         private int ComparePerfumeMatchDescending(PerfumeMatch match1, PerfumeMatch match2)
         {
             return match2.MatchPercentage.CompareTo(match1.MatchPercentage);
         }
 
-        // Checks if a perfume meets basic requirements for a store
-        private bool IsPerfumeEligible(Perfume perfume, StoreRequirement store)
+        // Allocates perfumes from match list to store within budget constraints
+        private void AllocateMatches(StoreRequirement store, Dictionary<string, Perfume> inventory, List<PerfumeMatch> matches)
         {
-            return perfume.Stock > 0 && perfume.AveragePrice <= store.MaxPrice;
-        }
-
-        // Allocates best matching perfumes to a store
-        private void AllocateBestMatches(StoreRequirement store, Dictionary<string, Perfume> inventory, List<PerfumeMatch> perfumeHeap)
-        {
-            List<PerfumeMatch> eligibleMatches = FilterEligibleMatches(store, perfumeHeap);
-
-            foreach (var bestMatch in eligibleMatches)
+            foreach (var match in matches)
             {
-                Perfume perfume = bestMatch.Perfume;
-                if (store.RemainingQuantity <= 0)
-                {
-                    return;
-                }
+                if (store.RemainingQuantity <= 0) return;
 
+                Perfume perfume = match.Perfume;
                 if (perfume.AveragePrice <= store.RemainingBudget)
                 {
-                    AllocatePerfumeToStore(store, inventory, bestMatch, perfume);
+                    store.AllocatedPerfumes.Add(perfume.Clone());
+                    store.TotalSpent += perfume.AveragePrice;
+                    string key = $"{perfume.Brand}_{perfume.Name}";
+                    inventory[key].Stock--;
+                    _totalProfit += perfume.AveragePrice * 0.3m;
                 }
             }
         }
 
-        // Filters eligible matches 
-        private List<PerfumeMatch> FilterEligibleMatches(StoreRequirement store, List<PerfumeMatch> perfumeHeap)
-        {
-            List<PerfumeMatch> eligibleMatches = new List<PerfumeMatch>();
-            foreach (var match in perfumeHeap)
-            {
-                if (store.RemainingQuantity > 0)
-                {
-                    eligibleMatches.Add(match);
-                }
-            }
-            return eligibleMatches;
-        }
-
-        // Allocates a single perfume to a store and updates inventory
-        private void AllocatePerfumeToStore(StoreRequirement store, Dictionary<string, Perfume> inventory, PerfumeMatch bestMatch, Perfume perfume)
-        {
-            store.AllocatedPerfumes.Add(perfume.Clone());
-            store.TotalSpent += perfume.AveragePrice;
-            string key = $"{perfume.Brand}_{perfume.Name}";
-            inventory[key].Stock--;
-            _totalProfit += perfume.AveragePrice * 0.3m;
-        }
-
-        // Uses backtracking to allocate alternative perfumes when primary matches are insufficient
-        private void BacktrackAllocate(StoreRequirement store, Dictionary<string, Perfume> inventory)
-        {
-            List<PerfumeMatch> alternativePerfumes = FindAlternativePerfumes(store, inventory);
-            AllocateAlternatives(store, inventory, alternativePerfumes);
-        }
-
-        // Finds alternative perfumes with lower match requirements
-        private List<PerfumeMatch> FindAlternativePerfumes(StoreRequirement store, Dictionary<string, Perfume> inventory)
-        {
-            List<PerfumeMatch> alternativePerfumes = new List<PerfumeMatch>();
-
-            foreach (var kvp in inventory)
-            {
-                Perfume perfume = kvp.Value;
-                if (IsPerfumeAlternativeEligible(perfume, store))
-                {
-                    double matchPercentage = perfume.CalculateMatchPercentage(store);
-                    if (matchPercentage >= 40.0 && matchPercentage < MinimumSatisfactionRequired)
-                    {
-                        alternativePerfumes.Add(new PerfumeMatch(matchPercentage, perfume));
-                    }
-                }
-            }
-
-            SortPerfumeMatchesByScoreDescending(alternativePerfumes);
-            return alternativePerfumes;
-        }
-
-        // Checks if a perfume is eligible as an alternative allocation
-        private bool IsPerfumeAlternativeEligible(Perfume perfume, StoreRequirement store)
-        {
-            return perfume.Stock > 0 && perfume.AveragePrice <= store.RemainingBudget;
-        }
-
-        // Allocates alternative perfumes to a store 
-        private void AllocateAlternatives(StoreRequirement store, Dictionary<string, Perfume> inventory, List<PerfumeMatch> alternativePerfumes)
-        {
-            List<PerfumeMatch> eligibleAlternatives = FilterEligibleAlternatives(store, alternativePerfumes);
-
-            foreach (var altMatch in eligibleAlternatives)
-            {
-                AllocateAlternativePerfume(store, inventory, altMatch.Perfume);
-            }
-        }
-
-        // Filters eligible alternatives 
-        private List<PerfumeMatch> FilterEligibleAlternatives(StoreRequirement store, List<PerfumeMatch> alternativePerfumes)
-        {
-            List<PerfumeMatch> eligibleAlternatives = new List<PerfumeMatch>();
-            foreach (var altMatch in alternativePerfumes)
-            {
-                if (store.RemainingQuantity <= 0)
-                {
-                    return eligibleAlternatives; 
-                }
-
-                if (altMatch.Perfume.AveragePrice <= store.RemainingBudget)
-                {
-                    eligibleAlternatives.Add(altMatch);
-                }
-            }
-            return eligibleAlternatives;
-        }
-
-        // Allocates a single alternative perfume to a store
-        private void AllocateAlternativePerfume(StoreRequirement store, Dictionary<string, Perfume> inventory, Perfume perfume)
-        {
-            store.AllocatedPerfumes.Add(perfume.Clone());
-            store.TotalSpent += perfume.AveragePrice;
-            string key = $"{perfume.Brand}_{perfume.Name}";
-            inventory[key].Stock--;
-            _totalProfit += perfume.AveragePrice * 0.3m;
-        }
-
-        // Improves store allocations by replacing poor matches with better ones
+        // Improves allocations for stores below target satisfaction using backtracking
         private void RebalanceAllocations(List<StoreRequirement> storeRequirements, Dictionary<string, Perfume> inventory)
         {
-            List<StoreRequirement> storesBelowTarget = FindStoresBelowTarget(_allocationResults);
-            foreach (var store in storesBelowTarget)
-            {
-                TryImproveStoreSatisfaction(store, inventory);
-            }
-        }
-
-        // Finds stores below target satisfaction 
-        private List<StoreRequirement> FindStoresBelowTarget(List<StoreRequirement> allocationResults)
-        {
-            List<StoreRequirement> storesBelowTarget = new List<StoreRequirement>();
-            foreach (var store in allocationResults)
+            foreach (var store in _allocationResults)
             {
                 if (store.SatisfactionPercentage < TargetSatisfactionGoal)
                 {
-                    storesBelowTarget.Add(store);
+                    _currentBacktrackingIterations = 0;
+
+                    TrySimpleImprovement(store, inventory);
+
+                    if (store.SatisfactionPercentage < TargetSatisfactionGoal)
+                    {
+                        BacktrackingRebalance(store, inventory);
+                    }
                 }
             }
-            return storesBelowTarget;
         }
 
-        // Attempts to improve a store's satisfaction by replacing worst-matching perfumes 
-        private void TryImproveStoreSatisfaction(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        // Tries quick improvement by replacing worst performing perfumes
+        private void TrySimpleImprovement(StoreRequirement store, Dictionary<string, Perfume> inventory)
         {
             if (store.AllocatedPerfumes.Count == 0) return;
 
-            List<PerfumeMatch> allocatedByPerformance = GetAllocatedPerfumesByPerformance(store);
+            List<PerfumeMatch> sortedPerfumes = GetAllocatedPerfumesByPerformance(store);
+            int replacementCount = Math.Max(1, sortedPerfumes.Count / 4);
 
-            int replacementCount = Math.Max(1, allocatedByPerformance.Count / 4);
-
-            for (int i = 0; i < replacementCount && i < allocatedByPerformance.Count; i++)
+            for (int i = 0; i < replacementCount && i < sortedPerfumes.Count; i++)
             {
-                var worstMatch = allocatedByPerformance[i];
+                var worstMatch = sortedPerfumes[i];
                 var betterOption = FindBetterReplacement(store, inventory, worstMatch);
 
                 if (betterOption != null)
                 {
-                    string key = $"{worstMatch.Perfume.Brand}_{worstMatch.Perfume.Name}";
-                    if (inventory.ContainsKey(key))
-                    {
-                        inventory[key].Stock++;
-                        _totalProfit -= worstMatch.Perfume.AveragePrice * 0.3m;
-                    }
+                    string oldKey = $"{worstMatch.Perfume.Brand}_{worstMatch.Perfume.Name}";
+                    string newKey = $"{betterOption.Brand}_{betterOption.Name}";
 
                     store.AllocatedPerfumes.Remove(worstMatch.Perfume);
-                    store.TotalSpent -= worstMatch.Perfume.AveragePrice;
-
                     store.AllocatedPerfumes.Add(betterOption.Clone());
-                    store.TotalSpent += betterOption.AveragePrice;
+                    store.TotalSpent = store.TotalSpent - worstMatch.Perfume.AveragePrice + betterOption.AveragePrice;
 
-                    string betterKey = $"{betterOption.Brand}_{betterOption.Name}";
-                    inventory[betterKey].Stock--;
-                    _totalProfit += betterOption.AveragePrice * 0.3m;
+                    inventory[oldKey].Stock++;
+                    inventory[newKey].Stock--;
+
+                    _totalProfit = _totalProfit - (worstMatch.Perfume.AveragePrice * 0.3m) + (betterOption.AveragePrice * 0.3m);
                 }
             }
 
             CalculateSatisfaction(store);
         }
 
-        // Gets allocated perfumes sorted by performance
+        // Gets allocated perfumes sorted by match performance ascending
         private List<PerfumeMatch> GetAllocatedPerfumesByPerformance(StoreRequirement store)
         {
             List<PerfumeMatch> allocatedByPerformance = new List<PerfumeMatch>();
 
-            // Step 1: Transform to PerfumeMatch objects 
             foreach (var perfume in store.AllocatedPerfumes)
             {
                 double matchPercentage = perfume.CalculateMatchPercentage(store);
                 allocatedByPerformance.Add(new PerfumeMatch(matchPercentage, perfume));
             }
 
-            // Step 2: Sort by performance ascending
             allocatedByPerformance.Sort(ComparePerfumeMatchAscending);
-
             return allocatedByPerformance;
         }
 
-        // Comparer for sorting perfume matches by score (ascending - worst first)
+        // Compares perfume matches by percentage ascending for worst-first sorting
         private int ComparePerfumeMatchAscending(PerfumeMatch match1, PerfumeMatch match2)
         {
             return match1.MatchPercentage.CompareTo(match2.MatchPercentage);
         }
 
-        // Finds a better replacement perfume with at least 10% higher match score
+        // Finds better replacement perfume with higher match score
         private Perfume FindBetterReplacement(StoreRequirement store, Dictionary<string, Perfume> inventory, PerfumeMatch currentMatch)
         {
             Perfume bestReplacement = null;
@@ -370,13 +242,11 @@ namespace PerfumeAllocationSystem.Core
             foreach (var kvp in inventory)
             {
                 Perfume perfume = kvp.Value;
-
                 if (perfume.Stock > 0 &&
                     perfume.AveragePrice <= store.RemainingBudget + currentMatch.Perfume.AveragePrice &&
                     perfume.AveragePrice <= store.MaxPrice)
                 {
                     double score = perfume.CalculateMatchPercentage(store);
-
                     if (score > bestScore + 10.0)
                     {
                         bestScore = score;
@@ -388,7 +258,156 @@ namespace PerfumeAllocationSystem.Core
             return bestReplacement;
         }
 
-        // Calculates the satisfaction percentage for a store based on allocated perfumes
+        // Uses recursive backtracking to find optimal perfume combinations for store
+        private void BacktrackingRebalance(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        {
+            List<Perfume> bestAllocation = new List<Perfume>();
+            foreach (var perfume in store.AllocatedPerfumes)
+            {
+                bestAllocation.Add(perfume.Clone());
+            }
+
+            decimal bestTotalSpent = store.TotalSpent;
+            double bestSatisfaction = store.SatisfactionPercentage;
+
+            List<Perfume> availablePerfumes = GetAvailablePerfumesForRebalancing(store, inventory);
+
+            if (BacktrackRebalanceRecursive(store, inventory, availablePerfumes, 0, ref bestSatisfaction, ref bestAllocation, ref bestTotalSpent))
+            {
+                ApplyBestSolution(store, inventory, bestAllocation, bestTotalSpent);
+            }
+        }
+
+        // Gets available perfumes suitable for rebalancing sorted by match score
+        private List<Perfume> GetAvailablePerfumesForRebalancing(StoreRequirement store, Dictionary<string, Perfume> inventory)
+        {
+            List<(Perfume perfume, double score)> perfumeScores = new List<(Perfume, double)>();
+
+            foreach (var kvp in inventory)
+            {
+                var perfume = kvp.Value;
+                if (perfume.Stock > 0 && perfume.AveragePrice <= store.MaxPrice)
+                {
+                    double matchScore = perfume.CalculateMatchPercentage(store);
+                    if (matchScore >= 50.0)
+                    {
+                        perfumeScores.Add((perfume, matchScore));
+                    }
+                }
+            }
+
+            perfumeScores.Sort((a, b) => b.score.CompareTo(a.score));
+
+            List<Perfume> available = new List<Perfume>();
+            foreach (var item in perfumeScores)
+            {
+                available.Add(item.perfume);
+            }
+
+            return available;
+        }
+
+        // Recursive function that explores perfume swaps to maximize satisfaction
+        private bool BacktrackRebalanceRecursive(StoreRequirement store, Dictionary<string, Perfume> inventory,
+                                               List<Perfume> availablePerfumes, int depth,
+                                               ref double bestSatisfaction, ref List<Perfume> bestAllocation, ref decimal bestTotalSpent)
+        {
+            _currentBacktrackingIterations++;
+
+            if (_currentBacktrackingIterations > _maxBacktrackingIterations || depth > 6)
+                return false;
+
+            CalculateSatisfaction(store);
+
+            if (store.SatisfactionPercentage > bestSatisfaction + 1.0)
+            {
+                bestSatisfaction = store.SatisfactionPercentage;
+                bestAllocation.Clear();
+                foreach (var perfume in store.AllocatedPerfumes)
+                {
+                    bestAllocation.Add(perfume.Clone());
+                }
+                bestTotalSpent = store.TotalSpent;
+
+                if (store.SatisfactionPercentage >= TargetSatisfactionGoal)
+                    return true;
+            }
+
+            bool foundBetter = false;
+            for (int i = 0; i < store.AllocatedPerfumes.Count; i++)
+            {
+                var currentPerfume = store.AllocatedPerfumes[i];
+
+                foreach (var newPerfume in availablePerfumes)
+                {
+                    if (CanSwap(store, currentPerfume, newPerfume, inventory))
+                    {
+                        SwapPerfumes(store, inventory, i, currentPerfume, newPerfume);
+
+                        if (BacktrackRebalanceRecursive(store, inventory, availablePerfumes, depth + 1,
+                                                      ref bestSatisfaction, ref bestAllocation, ref bestTotalSpent))
+                        {
+                            foundBetter = true;
+                        }
+
+                        SwapPerfumes(store, inventory, i, newPerfume, currentPerfume);
+                    }
+                }
+            }
+
+            return foundBetter;
+        }
+
+        // Checks if two perfumes can be swapped within budget and stock constraints
+        private bool CanSwap(StoreRequirement store, Perfume current, Perfume newPerfume, Dictionary<string, Perfume> inventory)
+        {
+            string newKey = $"{newPerfume.Brand}_{newPerfume.Name}";
+            return inventory[newKey].Stock > 0 &&
+                   newPerfume.AveragePrice <= store.RemainingBudget + current.AveragePrice &&
+                   newPerfume.AveragePrice <= store.MaxPrice;
+        }
+
+        // Swaps two perfumes in store allocation and updates inventory
+        private void SwapPerfumes(StoreRequirement store, Dictionary<string, Perfume> inventory, int index, Perfume oldPerfume, Perfume newPerfume)
+        {
+            store.AllocatedPerfumes[index] = newPerfume.Clone();
+            store.TotalSpent = store.TotalSpent - oldPerfume.AveragePrice + newPerfume.AveragePrice;
+
+            string oldKey = $"{oldPerfume.Brand}_{oldPerfume.Name}";
+            string newKey = $"{newPerfume.Brand}_{newPerfume.Name}";
+
+            inventory[oldKey].Stock++;
+            inventory[newKey].Stock--;
+
+            _totalProfit = _totalProfit - (oldPerfume.AveragePrice * 0.3m) + (newPerfume.AveragePrice * 0.3m);
+        }
+
+        // Applies the best allocation solution found by backtracking to store
+        private void ApplyBestSolution(StoreRequirement store, Dictionary<string, Perfume> inventory, List<Perfume> bestAllocation, decimal bestTotalSpent)
+        {
+            foreach (var perfume in store.AllocatedPerfumes)
+            {
+                string key = $"{perfume.Brand}_{perfume.Name}";
+                inventory[key].Stock++;
+                _totalProfit -= perfume.AveragePrice * 0.3m;
+            }
+
+            store.AllocatedPerfumes.Clear();
+            store.TotalSpent = 0;
+
+            foreach (var perfume in bestAllocation)
+            {
+                store.AllocatedPerfumes.Add(perfume.Clone());
+                store.TotalSpent += perfume.AveragePrice;
+                string key = $"{perfume.Brand}_{perfume.Name}";
+                inventory[key].Stock--;
+                _totalProfit += perfume.AveragePrice * 0.3m;
+            }
+
+            CalculateSatisfaction(store);
+        }
+
+        // Calculates satisfaction percentage based on average match scores of allocated perfumes
         private void CalculateSatisfaction(StoreRequirement store)
         {
             if (store.AllocatedPerfumes.Count == 0)
@@ -404,17 +423,22 @@ namespace PerfumeAllocationSystem.Core
                 totalSatisfaction += perfumeSatisfaction;
             }
 
-            double avgSatisfaction = totalSatisfaction / store.AllocatedPerfumes.Count;
-            store.SatisfactionPercentage = Math.Min(avgSatisfaction, 100.0);
+            store.SatisfactionPercentage = Math.Min(totalSatisfaction / store.AllocatedPerfumes.Count, 100.0);
         }
 
-        // Returns the total profit from the current allocation
+        // Returns total profit from all allocations
         public decimal GetTotalProfit()
         {
             return _totalProfit;
         }
 
-        // Resets the inventory to its original state
+        // Sets maximum iterations for backtracking to control performance
+        public void SetMaxBacktrackingIterations(int maxIterations)
+        {
+            _maxBacktrackingIterations = maxIterations;
+        }
+
+        // Resets inventory to original state for new allocation runs
         public void ResetInventory(List<Perfume> perfumes)
         {
             _perfumeInventory.Clear();

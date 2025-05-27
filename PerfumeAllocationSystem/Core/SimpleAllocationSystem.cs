@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using PerfumeAllocationSystem.Models;
 
 namespace PerfumeAllocationSystem.Core
@@ -10,7 +9,6 @@ namespace PerfumeAllocationSystem.Core
         private Dictionary<string, Perfume> _perfumeInventory = new Dictionary<string, Perfume>();
         private decimal _totalProfit = 0;
         private Random _random = new Random();
-
 
         // Initializes the simple allocation engine with perfume inventory
         public SimpleAllocationEngine(List<Perfume> perfumes)
@@ -27,14 +25,14 @@ namespace PerfumeAllocationSystem.Core
         {
             _totalProfit = 0;
             Dictionary<string, Perfume> workingInventory = CreateWorkingInventoryCopy();
-            List<StoreRequirement> results = storeRequirements.Select(s => s.Clone()).ToList();
+            List<StoreRequirement> results = CloneStoreRequirements(storeRequirements);
 
             foreach (var store in results)
             {
                 store.AllocatedPerfumes.Clear();
                 store.TotalSpent = 0;
                 List<Perfume> availablePerfumes = GetAvailablePerfumes(store, workingInventory);
-                availablePerfumes = availablePerfumes.OrderBy(p => _random.Next()).ToList();
+                ShufflePerfumes(availablePerfumes);
                 AllocatePerfumesToStore(store, workingInventory, availablePerfumes);
                 CalculateSatisfaction(store);
             }
@@ -42,12 +40,44 @@ namespace PerfumeAllocationSystem.Core
             return results;
         }
 
+        // Clones store requirements list
+        private List<StoreRequirement> CloneStoreRequirements(List<StoreRequirement> storeRequirements)
+        {
+            List<StoreRequirement> results = new List<StoreRequirement>();
+            foreach (var store in storeRequirements)
+            {
+                results.Add(store.Clone());
+            }
+            return results;
+        }
+
         // Gets all perfumes that match basic price and stock requirements
         private List<Perfume> GetAvailablePerfumes(StoreRequirement store, Dictionary<string, Perfume> inventory)
         {
-            return inventory.Values
-                .Where(p => p.Stock > 0 && p.AveragePrice <= store.MaxPrice)
-                .ToList();
+            List<Perfume> availablePerfumes = new List<Perfume>();
+            foreach (var perfume in inventory.Values)
+            {
+                if (perfume.Stock > 0 && perfume.AveragePrice <= store.MaxPrice)
+                {
+                    availablePerfumes.Add(perfume);
+                }
+            }
+            return availablePerfumes;
+        }
+
+        // Shuffles perfumes randomly 
+        private void ShufflePerfumes(List<Perfume> perfumes)
+        {
+            
+            for (int i = perfumes.Count - 1; i > 0; i--)
+            {
+                int randomIndex = _random.Next(i + 1);
+
+                
+                Perfume temp = perfumes[i];
+                perfumes[i] = perfumes[randomIndex];
+                perfumes[randomIndex] = temp;
+            }
         }
 
         // Allocates perfumes to a store in random order

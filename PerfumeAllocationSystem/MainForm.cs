@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Linq;
 using System.Text;
 using PerfumeAllocationSystem.Core;
 using PerfumeAllocationSystem.Models;
@@ -105,7 +104,7 @@ namespace PerfumeAllocationSystem
                     _simpleAllocationEngine = new SimpleAllocationEngine(_perfumes);
                 }
 
-                List<StoreRequirement> freshStoreRequirements = _storeRequirements.Select(s => s.Clone()).ToList();
+                List<StoreRequirement> freshStoreRequirements = CloneStoreRequirements(_storeRequirements);
 
                 List<StoreRequirement> simpleResults = _simpleAllocationEngine.AllocatePerfumes(freshStoreRequirements);
                 decimal simpleProfit = _simpleAllocationEngine.GetTotalProfit();
@@ -644,21 +643,45 @@ namespace PerfumeAllocationSystem
         private decimal GetMinimumPerfumePrice()
         {
             if (_perfumes.Count == 0) return 0;
-            return _perfumes.Min(p => p.AveragePrice);
+
+            decimal minPrice = _perfumes[0].AveragePrice;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (perfume.AveragePrice < minPrice)
+                {
+                    minPrice = perfume.AveragePrice;
+                }
+            }
+            return minPrice;
         }
 
         // Gets the average price from available perfumes
         private decimal GetAveragePerfumePrice()
         {
             if (_perfumes.Count == 0) return 100m;
-            return _perfumes.Average(p => p.AveragePrice);
+
+            decimal total = 0;
+            foreach (Perfume perfume in _perfumes)
+            {
+                total += perfume.AveragePrice;
+            }
+            return total / _perfumes.Count;
         }
 
         // Gets the maximum price from available perfumes
         private decimal GetMaximumPerfumePrice()
         {
             if (_perfumes.Count == 0) return 500m;
-            return _perfumes.Max(p => p.AveragePrice);
+
+            decimal maxPrice = _perfumes[0].AveragePrice;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (perfume.AveragePrice > maxPrice)
+                {
+                    maxPrice = perfume.AveragePrice;
+                }
+            }
+            return maxPrice;
         }
 
         // Checks if store criteria are too restrictive by counting matching perfumes
@@ -670,16 +693,39 @@ namespace PerfumeAllocationSystem
             string gender = GetSelectedGender();
             string accord = GetSelectedAccord();
 
-            int matchCount = _perfumes.Count(p =>
-                p.AveragePrice <= maxPrice &&
-                p.Stock > 0 &&
-                (string.IsNullOrEmpty(gender) || p.Gender == gender || p.Gender == "Unisex") &&
-                (string.IsNullOrEmpty(accord) || p.MainAccord == accord) &&
-                p.Longevity >= minLongevity &&
-                p.Projection >= minProjection
-            );
+            int matchCount = 0;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (DoesPerfumeMatchCriteria(perfume, maxPrice, gender, accord, minLongevity, minProjection))
+                {
+                    matchCount++;
+                }
+            }
 
             return matchCount < 5;
+        }
+
+        // Helper method to check if perfume matches criteria
+        private bool DoesPerfumeMatchCriteria(Perfume perfume, decimal maxPrice, string gender, string accord,
+                                             int minLongevity, int minProjection)
+        {
+            if (perfume.AveragePrice > maxPrice) return false;
+            if (perfume.Stock <= 0) return false;
+
+            if (!string.IsNullOrEmpty(gender))
+            {
+                if (perfume.Gender != gender && perfume.Gender != "Unisex") return false;
+            }
+
+            if (!string.IsNullOrEmpty(accord))
+            {
+                if (perfume.MainAccord != accord) return false;
+            }
+
+            if (perfume.Longevity < minLongevity) return false;
+            if (perfume.Projection < minProjection) return false;
+
+            return true;
         }
 
         // Validates numeric input for decimal values
@@ -784,9 +830,7 @@ namespace PerfumeAllocationSystem
         private void GenerateBasicStoreInfo()
         {
             txtStoreName.Text = $"Store_{_random.Next(1, 1000)}";
-
             txtBudget.Text = _random.Next(800, 8001).ToString();
-
             txtQuantity.Text = _random.Next(3, 15).ToString();
 
             string[] genders = { "Any", "Any", "Male", "Female", "Unisex" };
@@ -878,7 +922,19 @@ namespace PerfumeAllocationSystem
             if (noteCount.Count == 0)
                 return "";
 
-            return noteCount.OrderByDescending(x => x.Value).First().Key;
+            string mostCommonNote = "";
+            int highestCount = 0;
+
+            foreach (var kvp in noteCount)
+            {
+                if (kvp.Value > highestCount)
+                {
+                    highestCount = kvp.Value;
+                    mostCommonNote = kvp.Key;
+                }
+            }
+
+            return mostCommonNote;
         }
 
         // Generates random quality settings with realistic price constraints
@@ -895,7 +951,6 @@ namespace PerfumeAllocationSystem
             decimal targetPrice = maxPrice * randomFactor;
 
             targetPrice = Math.Max(targetPrice, minPrice * 1.2m);
-
             targetPrice = Math.Round(targetPrice / 10) * 10;
 
             txtMaxPrice.Text = targetPrice.ToString();
@@ -986,7 +1041,7 @@ namespace PerfumeAllocationSystem
                 }
             }
 
-            if (problematicStores.Any())
+            if (HasAnyProblematicStores(problematicStores))
             {
                 string names = string.Join(", ", problematicStores);
                 var result = MessageBox.Show($"Warning: The following stores have no matching perfumes: {names}\n" +
@@ -1006,10 +1061,10 @@ namespace PerfumeAllocationSystem
                 _compareAlgorithmsButton.Enabled = true;
             }
 
-            var zeroSatisfactionStores = results.Where(s => s.SatisfactionPercentage == 0).ToList();
-            if (zeroSatisfactionStores.Any())
+            List<StoreRequirement> zeroSatisfactionStores = FindZeroSatisfactionStores(results);
+            if (HasAnyZeroSatisfactionStores(zeroSatisfactionStores))
             {
-                string names = string.Join(", ", zeroSatisfactionStores.Select(s => s.StoreName));
+                string names = GetStoreNamesAsString(zeroSatisfactionStores);
                 MessageBox.Show($"The following stores received 0% satisfaction: {names}\n" +
                     "This is likely due to very restrictive criteria or insufficient budget.",
                     "Allocation Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -1026,13 +1081,83 @@ namespace PerfumeAllocationSystem
         // Counts perfumes that match a store's requirements
         private int CountMatchingPerfumes(StoreRequirement store)
         {
-            return _perfumes.Count(p =>
-                p.AveragePrice <= store.MaxPrice &&
-                p.Stock > 0 &&
-                (string.IsNullOrEmpty(store.Gender) || p.Gender == store.Gender || p.Gender == "Unisex") &&
-                p.Longevity >= store.MinLongevity &&
-                p.Projection >= store.MinProjection
-            );
+            int count = 0;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (DoesPerfumeMatchStore(perfume, store))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        // Helper method for perfume matching logic
+        private bool DoesPerfumeMatchStore(Perfume perfume, StoreRequirement store)
+        {
+            if (perfume.AveragePrice > store.MaxPrice) return false;
+            if (perfume.Stock <= 0) return false;
+
+            if (!string.IsNullOrEmpty(store.Gender))
+            {
+                if (perfume.Gender != store.Gender && perfume.Gender != "Unisex") return false;
+            }
+
+            if (perfume.Longevity < store.MinLongevity) return false;
+            if (perfume.Projection < store.MinProjection) return false;
+
+            return true;
+        }
+
+        // Clones store requirements list
+        private List<StoreRequirement> CloneStoreRequirements(List<StoreRequirement> original)
+        {
+            List<StoreRequirement> cloned = new List<StoreRequirement>();
+            foreach (StoreRequirement store in original)
+            {
+                cloned.Add(store.Clone());
+            }
+            return cloned;
+        }
+
+        // Finds zero satisfaction stores
+        private List<StoreRequirement> FindZeroSatisfactionStores(List<StoreRequirement> results)
+        {
+            List<StoreRequirement> zeroSatisfactionStores = new List<StoreRequirement>();
+            foreach (StoreRequirement store in results)
+            {
+                if (store.SatisfactionPercentage == 0)
+                {
+                    zeroSatisfactionStores.Add(store);
+                }
+            }
+            return zeroSatisfactionStores;
+        }
+
+        // Checks if any problematic stores exist
+        private bool HasAnyProblematicStores(List<string> problematicStores)
+        {
+            return problematicStores.Count > 0;
+        }
+
+        // Checks if any zero satisfaction stores exist
+        private bool HasAnyZeroSatisfactionStores(List<StoreRequirement> zeroSatisfactionStores)
+        {
+            return zeroSatisfactionStores.Count > 0;
+        }
+
+        // Gets store names as comma-separated string
+        private string GetStoreNamesAsString(List<StoreRequirement> stores)
+        {
+            if (stores.Count == 0) return "";
+
+            List<string> names = new List<string>();
+            foreach (StoreRequirement store in stores)
+            {
+                names.Add(store.StoreName);
+            }
+
+            return string.Join(", ", names);
         }
 
         // Displays allocation results in the main results grid
@@ -1209,7 +1334,7 @@ namespace PerfumeAllocationSystem
                 Location = new Point(300, 30)
             };
 
-            decimal totalSatisfaction = (decimal)_storeRequirements.Average(s => s.SatisfactionPercentage);
+            decimal totalSatisfaction = (decimal)CalculateAverageSatisfactionForStores(_storeRequirements);
             Label lblAverageSatisfaction = new Label
             {
                 Text = $"Average Satisfaction: {totalSatisfaction:F2}%",
@@ -1235,6 +1360,19 @@ namespace PerfumeAllocationSystem
             profitPanel.BringToFront();
         }
 
+        // Calculates average satisfaction for stores
+        private double CalculateAverageSatisfactionForStores(List<StoreRequirement> stores)
+        {
+            if (stores.Count == 0) return 0;
+
+            double total = 0;
+            foreach (StoreRequirement store in stores)
+            {
+                total += store.SatisfactionPercentage;
+            }
+            return total / stores.Count;
+        }
+
         // Creates a new tab page with detailed allocation results
         private void CreateResultsTab(List<StoreRequirement> results, decimal totalProfit)
         {
@@ -1257,12 +1395,12 @@ namespace PerfumeAllocationSystem
             };
             headerPanel.Controls.Add(lblTitle);
 
-            int totalItemsRequested = results.Sum(s => s.QuantityNeeded);
-            int totalItemsAllocated = results.Sum(s => s.AllocatedPerfumes.Count);
-            decimal totalBudget = results.Sum(s => s.Budget);
-            decimal totalSpent = results.Sum(s => s.TotalSpent);
-            double avgSatisfaction = results.Average(s => s.SatisfactionPercentage);
-            int storesAboveTarget = results.Count(s => s.SatisfactionPercentage >= 70.0);
+            int totalItemsRequested = CalculateTotalItemsRequested(results);
+            int totalItemsAllocated = CalculateTotalItemsAllocated(results);
+            decimal totalBudget = CalculateTotalBudget(results);
+            decimal totalSpent = CalculateTotalSpent(results);
+            double avgSatisfaction = CalculateAverageSatisfaction(results);
+            int storesAboveTarget = CountStoresAboveThreshold(results, 70.0);
 
             TableLayoutPanel statsTable = new TableLayoutPanel
             {
@@ -1455,6 +1593,77 @@ namespace PerfumeAllocationSystem
             tabControl1.SelectedTab = tabResult;
         }
 
+        // Calculates total items requested
+        private int CalculateTotalItemsRequested(List<StoreRequirement> results)
+        {
+            int total = 0;
+            foreach (StoreRequirement store in results)
+            {
+                total += store.QuantityNeeded;
+            }
+            return total;
+        }
+
+        // Calculates total items allocated
+        private int CalculateTotalItemsAllocated(List<StoreRequirement> results)
+        {
+            int total = 0;
+            foreach (StoreRequirement store in results)
+            {
+                total += store.AllocatedPerfumes.Count;
+            }
+            return total;
+        }
+
+        // Calculates total budget
+        private decimal CalculateTotalBudget(List<StoreRequirement> results)
+        {
+            decimal total = 0;
+            foreach (StoreRequirement store in results)
+            {
+                total += store.Budget;
+            }
+            return total;
+        }
+
+        // Calculates total spent
+        private decimal CalculateTotalSpent(List<StoreRequirement> results)
+        {
+            decimal total = 0;
+            foreach (StoreRequirement store in results)
+            {
+                total += store.TotalSpent;
+            }
+            return total;
+        }
+
+        // Calculates average satisfaction 
+        private double CalculateAverageSatisfaction(List<StoreRequirement> results)
+        {
+            if (results.Count == 0) return 0;
+
+            double total = 0;
+            foreach (StoreRequirement store in results)
+            {
+                total += store.SatisfactionPercentage;
+            }
+            return total / results.Count;
+        }
+
+        // Counts stores above threshold
+        private int CountStoresAboveThreshold(List<StoreRequirement> results, double threshold)
+        {
+            int count = 0;
+            foreach (StoreRequirement store in results)
+            {
+                if (store.SatisfactionPercentage >= threshold)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
         // Adds a statistic label to the table layout panel
         private void AddStatLabel(TableLayoutPanel table, string title, string value, int col, int row, bool isHighlight = false)
         {
@@ -1501,10 +1710,10 @@ namespace PerfumeAllocationSystem
                 explanation += "  - Budget is insufficient\n";
                 explanation += "  - All matching perfumes are out of stock\n\n";
 
-                int affordablePerfumes = _perfumes.Count(p => p.AveragePrice <= store.MaxPrice);
+                int affordablePerfumes = CountAffordablePerfumes(store.MaxPrice);
                 explanation += $"• Affordable perfumes (within ${store.MaxPrice}): {affordablePerfumes}\n";
 
-                int stockedAndAffordable = _perfumes.Count(p => p.AveragePrice <= store.MaxPrice && p.Stock > 0);
+                int stockedAndAffordable = CountStockedAndAffordablePerfumes(store.MaxPrice);
                 explanation += $"• In stock and affordable: {stockedAndAffordable}\n\n";
             }
             else
@@ -1523,13 +1732,13 @@ namespace PerfumeAllocationSystem
 
                 if (!string.IsNullOrEmpty(store.Gender))
                 {
-                    int matchingGender = store.AllocatedPerfumes.Count(p => p.Gender == store.Gender || p.Gender == "Unisex");
+                    int matchingGender = CountGenderMatchingPerfumes(store);
                     explanation += $"  - Gender match: {matchingGender}/{store.AllocatedPerfumes.Count} perfumes\n";
                 }
 
                 if (!string.IsNullOrEmpty(store.PreferredAccord))
                 {
-                    int matchingAccord = store.AllocatedPerfumes.Count(p => p.MainAccord == store.PreferredAccord);
+                    int matchingAccord = CountAccordMatchingPerfumes(store);
                     explanation += $"  - Accord match: {matchingAccord}/{store.AllocatedPerfumes.Count} perfumes\n";
                 }
 
@@ -1561,6 +1770,59 @@ namespace PerfumeAllocationSystem
             explanation += "• Reduce the minimum requirements for longevity and projection";
 
             return explanation;
+        }
+
+        // Helper methods for satisfaction explanation 
+        private int CountAffordablePerfumes(decimal maxPrice)
+        {
+            int count = 0;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (perfume.AveragePrice <= maxPrice)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private int CountStockedAndAffordablePerfumes(decimal maxPrice)
+        {
+            int count = 0;
+            foreach (Perfume perfume in _perfumes)
+            {
+                if (perfume.AveragePrice <= maxPrice && perfume.Stock > 0)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private int CountGenderMatchingPerfumes(StoreRequirement store)
+        {
+            int count = 0;
+            foreach (Perfume perfume in store.AllocatedPerfumes)
+            {
+                if (perfume.Gender == store.Gender || perfume.Gender == "Unisex")
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private int CountAccordMatchingPerfumes(StoreRequirement store)
+        {
+            int count = 0;
+            foreach (Perfume perfume in store.AllocatedPerfumes)
+            {
+                if (perfume.MainAccord == store.PreferredAccord)
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         // Returns color based on satisfaction percentage for visual feedback
@@ -1688,12 +1950,6 @@ namespace PerfumeAllocationSystem
             dgvPerfumes.DataSource = null;
             dgvStores.DataSource = null;
             dgvResults.DataSource = null;
-        }
-
-        // Clears all detail panels from allocation display
-        private void ClearDetailPanels()
-        {
-            pnlAllocationDetails.Controls.Clear();
         }
 
         // Resets all informational labels to default states

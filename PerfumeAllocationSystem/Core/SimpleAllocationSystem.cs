@@ -96,7 +96,7 @@ namespace PerfumeAllocationSystem.Core
                     store.TotalSpent += perfume.AveragePrice;
                     string key = $"{perfume.Brand}_{perfume.Name}";
                     inventory[key].Stock--;
-                    _totalProfit += perfume.AveragePrice * 0.28m;
+                    _totalProfit += perfume.AveragePrice * 0.27m;
                 }
             }
         }
